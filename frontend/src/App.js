@@ -1,56 +1,97 @@
-import { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-import { HOME } from "@/constants/testIds";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import { AuthCallback, AuthProvider, ProtectedRoute, useAuth } from "@/lib/auth";
+import { I18nProvider } from "@/lib/i18n";
+import { ThemeProvider } from "@/lib/theme";
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
+import { AppShell } from "@/components/AppShell";
+import { Toaster } from "@/components/ui/sonner";
+
+import LandingPage from "@/pages/Landing";
+import AuthPage from "@/pages/Auth";
+import DashboardPage from "@/pages/Dashboard";
+import TagEditPage from "@/pages/TagEdit";
+import TagQRPage from "@/pages/TagQR";
+import TagMedicalPage from "@/pages/TagMedical";
+import InboxPage from "@/pages/Inbox";
+import SettingsPage from "@/pages/Settings";
+import FinderPage from "@/pages/Finder";
+import ClaimPage from "@/pages/Claim";
+import { MedicalDisclaimerPage, PrivacyPage, TermsPage } from "@/pages/Legal";
+
+/**
+ * AppRouter — handle the Emergent Google `session_id` fragment FIRST, before
+ * any other route renders.
+ *
+ * REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS,
+ * THIS BREAKS THE AUTH.
+ */
+function AppRouter() {
+    const location = useLocation();
+    if (typeof window !== "undefined" && window.location.hash?.includes("session_id=")) {
+        return <AuthCallback />;
     }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          data-testid={HOME.emergentLink}
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
+    return (
         <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
+            {/* Public */}
+            <Route path="/" element={<HomeOrDashboard />} />
+            <Route path="/login" element={<AuthPage mode="login" />} />
+            <Route path="/signup" element={<AuthPage mode="signup" />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+
+            <Route path="/tag/:slug" element={<FinderPage />} />
+            <Route path="/claim/:slug" element={<ClaimPage />} />
+
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/medical-disclaimer" element={<MedicalDisclaimerPage />} />
+
+            {/* Owner area */}
+            <Route
+                element={
+                    <ProtectedRoute>
+                        <AppShell />
+                    </ProtectedRoute>
+                }
+            >
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/inbox" element={<InboxPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/tags/new" element={<TagEditPage />} />
+                <Route path="/tags/:id" element={<TagEditPage />} />
+                <Route path="/tags/:id/qr" element={<TagQRPage />} />
+                <Route path="/tags/:id/medical" element={<TagMedicalPage />} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
-    </div>
-  );
+    );
 }
 
-export default App;
+function HomeOrDashboard() {
+    const { user, loading } = useAuth();
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+                <div className="animate-pulse-soft">Loading…</div>
+            </div>
+        );
+    }
+    return user ? <Navigate to="/dashboard" replace /> : <LandingPage />;
+}
+
+export default function App() {
+    return (
+        <ThemeProvider>
+            <I18nProvider>
+                <BrowserRouter>
+                    <AuthProvider>
+                        <AppRouter />
+                        <Toaster position="top-center" richColors />
+                    </AuthProvider>
+                </BrowserRouter>
+            </I18nProvider>
+        </ThemeProvider>
+    );
+}

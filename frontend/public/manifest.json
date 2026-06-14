@@ -1,0 +1,26 @@
+{
+    "name": "TagIT — Privacy-first smart tags",
+    "short_name": "TagIT",
+    "description": "Free, no-app, privacy-first smart tags for vehicles, pets, luggage, keys and medical IDs. Made in India.",
+    "start_url": "/dashboard",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#FAFAFA",
+    "theme_color": "#0F172A",
+    "lang": "en-IN",
+    "categories": ["utilities", "lifestyle", "medical"],
+    "icons": [
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230F172A'/%3E%3Cpath d='M126 66l-24-24-54 54v24h24l54-54z' stroke='%23E25822' stroke-width='14' fill='none' stroke-linejoin='round'/%3E%3Ccircle cx='84' cy='84' r='10' fill='%23E25822'/%3E%3C/svg%3E",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%230F172A'/%3E%3Cpath d='M336 176l-64-64-144 144v64h64l144-144z' stroke='%23E25822' stroke-width='38' fill='none' stroke-linejoin='round'/%3E%3Ccircle cx='224' cy='224' r='28' fill='%23E25822'/%3E%3C/svg%3E",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

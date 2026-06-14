@@ -1,89 +1,91 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
-import logging
-from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
-import uuid
-from datetime import datetime, timezone
+"""TagIT — FastAPI entrypoint."""
+from __future__ import annotations
 
+from dotenv import load_dotenv
+from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(ROOT_DIR / ".env")
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+import logging  # noqa: E402
+import os  # noqa: E402
 
-# Create the main app without a prefix
-app = FastAPI()
+from fastapi import FastAPI  # noqa: E402
+from starlette.middleware.cors import CORSMiddleware  # noqa: E402
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+from db import close_db, ensure_indexes, get_db, seed_admin_and_demo  # noqa: E402
+from notifications import email_enabled, twilio_enabled, whatsapp_enabled  # noqa: E402
+from routes.auth_routes import router as auth_router  # noqa: E402
+from routes.message_routes import router as message_router  # noqa: E402
+from routes.pdf_routes import router as pdf_router  # noqa: E402
+from routes.profile_routes import router as profile_router  # noqa: E402
+from routes.tag_routes import router as tag_router  # noqa: E402
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="TagIT", version="0.1.0", docs_url="/docs", redoc_url="/redoc")
 
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+def _allowed_origins() -> list[str]:
+    raw = os.environ.get("CORS_ORIGINS", "*")
+    if raw == "*":
+        return [os.environ.get("FRONTEND_URL", "http://localhost:3000")]
+    return [o.strip() for o in raw.split(",") if o.strip()]
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Include the router in the main app
-app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=_allowed_origins(),
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+app.include_router(auth_router)
+app.include_router(tag_router)
+app.include_router(profile_router)
+app.include_router(message_router)
+app.include_router(pdf_router)
+
+
+@app.get("/api")
+async def root() -> dict:
+    return {"name": "TagIT API", "tagline": "Privacy-first, no-app, public-service smart tags.", "made_in": "India", "docs": "/docs"}
+
+
+@app.get("/api/health")
+async def health() -> dict:
+    return {"ok": True, "email_enabled": email_enabled(), "whatsapp_enabled": whatsapp_enabled(), "twilio_enabled": twilio_enabled()}
+
+
+@app.get("/api/features")
+async def features() -> dict:
+    return {"email": email_enabled(), "whatsapp": whatsapp_enabled(), "twilio_masked_calls": twilio_enabled(), "made_in_india": True}
+
+
+@app.post("/api/integrations/whatsapp/notify")
+async def whatsapp_notify_placeholder() -> dict:
+    if not whatsapp_enabled():
+        return {"ok": False, "reason": "WhatsApp notifications are a paid feature — configure WHATSAPP_API_KEY"}
+    return {"ok": True, "note": "Wired placeholder — implement provider call here."}
+
+
+@app.post("/api/integrations/twilio/connect-call")
+async def twilio_connect_call_placeholder() -> dict:
+    if not twilio_enabled():
+        return {"ok": False, "reason": "Masked calling is a paid feature — configure TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN"}
+    return {"ok": True, "note": "Wired placeholder — implement masked-call flow here."}
+
+
+@app.on_event("startup")
+async def on_startup() -> None:
+    db = get_db()
+    await ensure_indexes(db)
+    await seed_admin_and_demo(db)
+    logger.info("TagIT API ready. Email=%s WhatsApp=%s Twilio=%s", email_enabled(), whatsapp_enabled(), twilio_enabled())
+
 
 @app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+async def on_shutdown() -> None:
+    await close_db()
