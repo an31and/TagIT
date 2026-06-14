@@ -15,6 +15,7 @@ import {
 
 import { Button } from "../components/ui/button";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
+import { SponsorSection } from "../components/SponsorSection";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useI18n } from "../lib/i18n";
 import { useAuth } from "../lib/auth";
@@ -166,6 +167,9 @@ export default function LandingPage() {
                     <Step n="3" icon={<ScanLine className="h-5 w-5" />} title={t("landing.how_step_3")} body={t("landing.how_step_3_desc")} />
                 </div>
             </section>
+
+            {/* Sponsor a tag — civic enhancement */}
+            <SponsorSection />
 
             <footer className="border-t mt-10">
                 <div className="mx-auto max-w-6xl px-4 sm:px-8 py-10 grid sm:grid-cols-2 gap-6 text-sm">

@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-import requests
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from auth import (
@@ -133,11 +133,11 @@ async def google_session(payload: dict, response: Response) -> dict:
     if not session_id:
         raise HTTPException(status_code=400, detail="session_id is required")
     try:
-        resp = requests.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-            headers={"X-Session-ID": session_id},
-            timeout=8,
-        )
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            resp = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": session_id},
+            )
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=502, detail=f"Emergent auth unreachable: {exc}")
     if resp.status_code != 200:
@@ -208,9 +208,27 @@ async def change_password(
 
 
 @router.delete("/me")
-async def delete_me(response: Response, user: dict = Depends(_current_user_dep)) -> dict:
-    """Right-to-be-forgotten: wipes user, tags, profiles, messages, scans."""
+async def delete_me(
+    response: Response,
+    request: Request,
+    user: dict = Depends(_current_user_dep),
+) -> dict:
+    """Right-to-be-forgotten: wipes user, tags, profiles, messages, scans.
+
+    For password-auth users we require the current password in the request
+    body — destructive irreversible operations need a confirmation that the
+    UI alone cannot fake.  Google-only users (no password_hash) skip the check.
+    """
     db = get_db()
+    full = await db.users.find_one({"id": user["id"]}, {"_id": 0}) or user
+    if full.get("password_hash"):
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+        current_password = (body or {}).get("current_password", "")
+        if not current_password or not verify_password(current_password, full["password_hash"]):
+            raise HTTPException(status_code=400, detail="Current password is required to delete the account")
     tag_ids = [t["id"] async for t in db.tags.find({"owner_id": user["id"]}, {"id": 1, "_id": 0})]
     if tag_ids:
         await db.profiles.delete_many({"tag_id": {"$in": tag_ids}})

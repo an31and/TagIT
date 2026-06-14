@@ -142,7 +142,13 @@ function StatTile({ label, value, icon, onClick, testId }) {
                 <div className="text-xs uppercase tracking-widest text-muted-foreground">{label}</div>
                 <div className="text-muted-foreground">{icon}</div>
             </div>
-            <div className="mt-3 font-display text-3xl font-black tracking-tight">{value}</div>
+            <div className="mt-3 font-display text-3xl font-black tracking-tight">
+                {value === "—" ? (
+                    <span className="inline-block h-8 w-12 rounded bg-muted animate-pulse-soft" aria-label="loading" />
+                ) : (
+                    value
+                )}
+            </div>
         </button>
     );
 }

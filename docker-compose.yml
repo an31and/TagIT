@@ -1,0 +1,42 @@
+# One-command local stack for self-hosters.
+# Usage:
+#   cp backend/.env.example backend/.env  (edit JWT_SECRET, SITE_URL, FRONTEND_URL)
+#   docker compose up --build
+#
+# Then open http://localhost:3000
+
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - tagit_mongo:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      MONGO_URL: "mongodb://mongo:27017"
+      DB_NAME: "tagit"
+      CORS_ORIGINS: "http://localhost:3000"
+    depends_on:
+      - mongo
+    ports:
+      - "8001:8001"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_BACKEND_URL: "http://localhost:8001"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  tagit_mongo:

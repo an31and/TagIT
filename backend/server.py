@@ -9,6 +9,7 @@ load_dotenv(ROOT_DIR / ".env")
 
 import logging  # noqa: E402
 import os  # noqa: E402
+from contextlib import asynccontextmanager  # noqa: E402
 
 from fastapi import FastAPI  # noqa: E402
 from starlette.middleware.cors import CORSMiddleware  # noqa: E402
@@ -19,12 +20,33 @@ from routes.auth_routes import router as auth_router  # noqa: E402
 from routes.message_routes import router as message_router  # noqa: E402
 from routes.pdf_routes import router as pdf_router  # noqa: E402
 from routes.profile_routes import router as profile_router  # noqa: E402
+from routes.sponsor_routes import router as sponsor_router  # noqa: E402
 from routes.tag_routes import router as tag_router  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="TagIT", version="0.1.0", docs_url="/docs", redoc_url="/redoc")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = get_db()
+    await ensure_indexes(db)
+    await seed_admin_and_demo(db)
+    logger.info(
+        "TagIT API ready. Email=%s WhatsApp=%s Twilio=%s",
+        email_enabled(), whatsapp_enabled(), twilio_enabled(),
+    )
+    yield
+    await close_db()
+
+
+app = FastAPI(
+    title="TagIT",
+    version="0.1.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
+)
 
 
 def _allowed_origins() -> list[str]:
@@ -47,6 +69,7 @@ app.include_router(tag_router)
 app.include_router(profile_router)
 app.include_router(message_router)
 app.include_router(pdf_router)
+app.include_router(sponsor_router)
 
 
 @app.get("/api")
@@ -76,16 +99,3 @@ async def twilio_connect_call_placeholder() -> dict:
     if not twilio_enabled():
         return {"ok": False, "reason": "Masked calling is a paid feature — configure TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN"}
     return {"ok": True, "note": "Wired placeholder — implement masked-call flow here."}
-
-
-@app.on_event("startup")
-async def on_startup() -> None:
-    db = get_db()
-    await ensure_indexes(db)
-    await seed_admin_and_demo(db)
-    logger.info("TagIT API ready. Email=%s WhatsApp=%s Twilio=%s", email_enabled(), whatsapp_enabled(), twilio_enabled())
-
-
-@app.on_event("shutdown")
-async def on_shutdown() -> None:
-    await close_db()

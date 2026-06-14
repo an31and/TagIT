@@ -1,0 +1,47 @@
+{
+  "summary": "Iteration-2 testing of TagIT. 14/15 NEW-feature backend tests pass (scan-dedupe missing). All sanity old flows (admin login + 3 demo tags + public finder + medical emergency block + inbox) still green. Sponsor POST/stats/honeypot/422 OK. DELETE /api/auth/me requires current_password (verified missing/wrong/correct cases). Async google session non-blocking (concurrent /api/health < 5s while invalid session_id in flight). Lifespan startup log 'TagIT API ready' present, no on_event deprecation. Frontend: SponsorSection renders on Landing with correct data-testids; form opens, fills, submits, success toast 'Thank you! We'll be in touch.' visible. Dashboard StatTile skeleton (grey animate-pulse-soft block) captured before stats resolve to 3/3/3. Docker/dev-ex artifacts all exist and are syntactically valid (yaml.safe_load + py_compile both pass).",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "GET /api/public/tags/{slug}",
+        "issue": "Scan dedupe within 30s NOT implemented. tag_routes.py:170-179 calls db.scans.insert_one() unconditionally on every GET. Verified empirically: 5 rapid GETs incremented scan_count by 5 (9 -> 14), not 1 as the iteration claims. The dedupe was listed as shipped in this iteration's review request but the code is unchanged from iteration 1.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration2_new_features.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/iteration2_new.xml"
+  ],
+  "action_items": [
+    "Add scan dedupe in /app/backend/routes/tag_routes.py get_public_tag. Suggested fix: before db.scans.insert_one(...), check db.scans.find_one({'tag_id': doc['id'], 'ip_hash': hash_ip(ip), 'scanned_at': {'$gte': (datetime.now(timezone.utc) - timedelta(seconds=30)).isoformat()}}) and skip insert if a recent match exists. timedelta is already imported.",
+    "(Optional) After the fix, re-run the single failing test: pytest /app/backend/tests/test_iteration2_new_features.py::TestScanDedupe -v"
+  ],
+  "critical_code_review_comments": [
+    "tag_routes.get_public_tag still missing the dedupe window mentioned in the review request — code review comment from iteration_1 was not addressed despite being listed in this iteration's scope.",
+    "auth_routes.delete_me: good — now requires current_password for password users. Google-only users (empty password_hash) correctly skip the check.",
+    "auth_routes.google_session: correctly migrated to httpx.AsyncClient with 8s timeout; non-blocking verified.",
+    "sponsor_routes: honeypot returns ok=true and silently drops doc — good UX. Inputs are HTML-tag-stripped + length-capped. EmailStr enforces format. ge=1/le=100000 caps tag_count.",
+    "server.py: lifespan via @asynccontextmanager — confirmed via startup log 'TagIT API ready' with no DeprecationWarning."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration2_new_features.py (new — iteration-2 focused tests)"
+  ],
+  "success_rate": {
+    "backend": "93% (14/15 new-feature tests; the 1 failure is the missing scan-dedupe feature)",
+    "frontend": "100% on covered new flows (sponsor section + dashboard skeleton)"
+  },
+  "test_credentials": "Admin: anand@tagit.in / TagITAdmin@2026 (seeded). RTBF tests auto-create disposable rtbf_<uuid>@tagit.in accounts.",
+  "seed_data_creation": "None beyond backend startup seed. The test suite creates TEST_ sponsor docs which are intentionally left in db.sponsors (read-only stats endpoint, no cleanup endpoint exists). Total_pledged increases by 50 per run.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Only blocker is the missing scan dedupe in tag_routes.get_public_tag. Once main agent adds the find_one-within-30s guard, re-run pytest /app/backend/tests/test_iteration2_new_features.py — all 15 should pass. The sponsor stats endpoint accumulates TEST_ entries; ignore exact totals across runs and only assert deltas. The honeypot field is positioned off-screen via Tailwind on the SponsorSection (aria-hidden) — confirmed not visible in screenshots. Google /api/auth/google/session non-blocking behaviour is verified by firing it concurrently with /api/health and asserting /api/health responds in < 5s — feel free to use the same pattern.",
+  "rca of the issue": "RCA for scan-dedupe miss: tag_routes.py:160-205 (get_public_tag) was NOT modified in this iteration. The code still does an unconditional db.scans.insert_one(...) with a fresh scan id every call. Reproduction: hit GET /api/public/tags/<any-slug> 5x in <30s from the same client, then GET /api/tags/<tag_id>/activity as the owner — scan_count goes up by 5 (observed 9 -> 14). Mitigation: insert a `find_one` against `db.scans` filtered by tag_id + ip_hash + scanned_at >= now-30s and skip the insert when a hit exists (datetime + timedelta + timezone are already imported in the module)."
+}

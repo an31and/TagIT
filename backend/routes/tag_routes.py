@@ -4,7 +4,7 @@ from __future__ import annotations
 import io
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import qrcode
 from fastapi import APIRouter, Depends, HTTPException, Request
