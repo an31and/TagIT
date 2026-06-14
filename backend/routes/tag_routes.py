@@ -165,8 +165,14 @@ async def get_public_tag(slug: str, request: Request) -> dict:
         raise HTTPException(status_code=404, detail="Tag not found")
 
     # Record the scan, de-duped within 30s per (tag_id, hashed-IP) so a
-    # finder hitting refresh doesn't pollute scan counts.
-    ip = request.client.host if request.client else "0.0.0.0"
+    # finder hitting refresh doesn't pollute scan counts.  We prefer the
+    # left-most X-Forwarded-For entry so multiple ingress IPs from one
+    # client still resolve to the same hash.
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        ip = fwd.split(",")[0].strip()
+    else:
+        ip = request.client.host if request.client else "0.0.0.0"
     ua = request.headers.get("user-agent", "")[:200]
     ip_h = hash_ip(ip)
     now = datetime.now(timezone.utc)

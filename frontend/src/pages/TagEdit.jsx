@@ -281,7 +281,10 @@ export default function TagEditPage() {
                 )}
                 <Button onClick={onSave} disabled={saving} className="ml-auto rounded-full gap-2" data-testid="tag-save-btn">
                     <Save className="h-4 w-4" />
-                    {saving ? t("common.loading") : isNew ? t("tag_edit.create") : t("tag_edit.save")}
+                    {(() => {
+                        if (saving) return t("common.loading");
+                        return isNew ? t("tag_edit.create") : t("tag_edit.save");
+                    })()}
                 </Button>
             </div>
         </div>

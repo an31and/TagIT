@@ -174,7 +174,10 @@ export default function AuthPage({ mode = "login" }) {
                             disabled={submitting}
                             data-testid={isSignup ? "register-submit-button" : "login-submit-button"}
                         >
-                            {submitting ? t("common.loading") : isSignup ? t("common.sign_up") : t("common.sign_in")}
+                            {(() => {
+                                if (submitting) return t("common.loading");
+                                return isSignup ? t("common.sign_up") : t("common.sign_in");
+                            })()}
                         </Button>
 
                         <p className="text-sm text-muted-foreground text-center">

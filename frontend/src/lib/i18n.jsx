@@ -434,7 +434,11 @@ export function I18nProvider({ children }) {
         try {
             localStorage.setItem("tagit_lang", lang);
             document.documentElement.lang = lang;
-        } catch {}
+        } catch (err) {
+            // localStorage may be unavailable (Safari private mode, SSR). Locale still
+            // works in-memory — just won't survive a reload.
+            console.warn("Locale persist skipped:", err?.message || err);
+        }
     }, [lang]);
 
     const value = useMemo(() => {

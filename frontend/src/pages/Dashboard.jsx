@@ -111,17 +111,7 @@ export default function DashboardPage() {
                     ))}
                 </TabsList>
                 <TabsContent value={filter} className="mt-6">
-                    {tags === null ? (
-                        <SkeletonGrid />
-                    ) : filtered.length === 0 ? (
-                        <EmptyState onCreate={() => navigate("/tags/new")} />
-                    ) : (
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {filtered.map((tag) => (
-                                <TagCard key={tag.id} tag={tag} />
-                            ))}
-                        </div>
-                    )}
+                    <DashboardTagGrid tags={tags} filtered={filtered} onCreate={() => navigate("/tags/new")} />
                 </TabsContent>
             </Tabs>
 
@@ -153,11 +143,24 @@ function StatTile({ label, value, icon, onClick, testId }) {
     );
 }
 
-function SkeletonGrid() {
+function DashboardTagGrid({ tags, filtered, onCreate }) {
+    if (tags === null) return <SkeletonGrid />;
+    if (filtered.length === 0) return <EmptyState onCreate={onCreate} />;
     return (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="surface p-5 space-y-3">
+            {filtered.map((tag) => (
+                <TagCard key={tag.id} tag={tag} />
+            ))}
+        </div>
+    );
+}
+
+function SkeletonGrid() {
+    const placeholders = ["sk-a", "sk-b", "sk-c"];
+    return (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {placeholders.map((id) => (
+                <div key={id} className="surface p-5 space-y-3">
                     <Skeleton className="h-5 w-1/3" />
                     <Skeleton className="h-7 w-3/4" />
                     <Skeleton className="h-12 w-full" />

@@ -21,8 +21,8 @@ BASE_URL = os.environ.get(
     "REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com"
 ).rstrip("/")
 
-ADMIN_EMAIL = "anand@tagit.in"
-ADMIN_PASSWORD = "TagITAdmin@2026"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "TagITAdmin@2026")
 
 
 # ---------- Fixtures ----------
@@ -80,9 +80,16 @@ class TestSanityOldFlows:
 
 # ---------- Scan dedupe within 30s ----------
 class TestScanDedupe:
-    def test_repeat_scans_within_30s_increment_by_one(self, admin_session, admin_tags):
-        # Use the medical tag (any tag works) but read activity BEFORE and AFTER
-        tag = admin_tags[0]
+    def test_repeat_scans_within_30s_increment_by_one(self, admin_session):
+        # Create a FRESH tag so no prior scan from this IP exists inside the
+        # 30s dedupe window — otherwise the test result depends on whatever
+        # else hit the seeded tag in the last 30 seconds.
+        create = admin_session.post(
+            f"{BASE_URL}/api/tags",
+            json={"type": "general", "label": "Scan-dedupe test"},
+        )
+        assert create.status_code == 200, create.text
+        tag = create.json()
         tag_id = tag["id"]
         slug = tag["slug"]
 
@@ -105,6 +112,9 @@ class TestScanDedupe:
             f"but increased by {delta} ({before_count} -> {after_count}). "
             f"Dedupe logic appears to be missing from GET /api/public/tags/{{slug}}."
         )
+
+        # Cleanup so we don't pollute the admin's tag list across reruns
+        admin_session.delete(f"{BASE_URL}/api/tags/{tag_id}")
 
 
 # ---------- DELETE /api/auth/me requires current_password ----------

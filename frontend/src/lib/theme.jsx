@@ -19,7 +19,11 @@ export function ThemeProvider({ children }) {
         else root.classList.remove("dark");
         try {
             localStorage.setItem("tagit_theme", theme);
-        } catch {}
+        } catch (err) {
+            // localStorage may be unavailable (Safari private mode, SSR). Theme still
+            // works in-memory — just won't survive a reload.
+            console.warn("Theme persist skipped:", err?.message || err);
+        }
     }, [theme]);
 
     const value = useMemo(

@@ -59,7 +59,11 @@ export function AuthProvider({ children }) {
     const logout = async () => {
         try {
             await api.post("/auth/logout");
-        } catch {}
+        } catch (err) {
+            // Logout is best-effort — even if the server call fails (network),
+            // we still clear the user locally so the UI feels responsive.
+            console.warn("Server logout failed; clearing client session anyway:", err?.message || err);
+        }
         setUser(false);
     };
 

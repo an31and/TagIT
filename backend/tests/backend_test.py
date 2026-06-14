@@ -12,8 +12,8 @@ import pytest
 import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com").rstrip("/")
-ADMIN_EMAIL = "anand@tagit.in"
-ADMIN_PASSWORD = "TagITAdmin@2026"
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "TagITAdmin@2026")
 
 
 # ---------- Fixtures ----------
