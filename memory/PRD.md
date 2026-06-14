@@ -41,18 +41,25 @@ Founder & owner: Anand Lakhera — +91 89042 23100 · an.31and@gmail.com
    wired as documented placeholders behind feature flags.
 
 ## What's been implemented (2026-02-14)
-- Backend: full CRUD, claim flow, public finder lookup with scan capture,
-  finder message endpoint (rate-limited + honeypot + HTML stripping),
-  medical profile endpoints, PDF generator (A4/ID-card/keyring),
-  WhatsApp/Twilio placeholder endpoints, email helper (env-gated),
-  right-to-be-forgotten delete, account data export, JWT + Emergent Google
-  session exchange, admin + 3 demo tags seeded on boot.
-- Frontend: Landing, Login/Signup, AuthCallback (Google), Dashboard,
-  TagEdit, TagQR, TagMedical, Inbox, Settings, Finder, EmergencyView,
-  Claim, Privacy/Terms/MedicalDisclaimer.  PWA manifest + service worker.
-  Light/dark theme toggle, 5-language switcher (EN, HI, MR, BN, TA).
-- Testing: 33/33 backend pytest pass, all frontend flows green via
-  Playwright.
+- Backend: full CRUD, claim flow, public finder lookup with scan capture
+  (de-duped per 30s + hashed-IP window), finder message endpoint
+  (rate-limited + honeypot + HTML stripping), medical profile endpoints,
+  PDF generator (A4/ID-card/keyring), WhatsApp/Twilio placeholder
+  endpoints, email helper (env-gated), right-to-be-forgotten delete with
+  password confirmation, account data export, JWT + Emergent Google
+  session exchange (async via httpx), Sponsor-a-tag endpoint + public
+  stats, admin + 3 demo tags seeded on boot. FastAPI lifespan context
+  manager (no deprecation warnings).
+- Frontend: Landing (with Sponsor section), Login/Signup, AuthCallback,
+  Dashboard (with skeleton stat tiles), TagEdit, TagQR, TagMedical, Inbox,
+  Settings, Finder, EmergencyView, Claim, Privacy/Terms/MedicalDisclaimer.
+  PWA manifest + service worker. Light/dark theme. 5-language switcher
+  (EN, HI, MR, BN, TA).
+- DevX: docker-compose + per-folder Dockerfiles + nginx.conf + .env.example
+  files for both backend & frontend, MIT LICENSE, CONTRIBUTING.md,
+  root + per-folder READMEs, standalone seed.py.
+- Testing: 33/33 backend pytest pass on iteration_1; iteration_2 verified
+  the full backlog with new feature tests.
 
 ## Backlog / Next actions
 - **P1** Skeletons on dashboard stat tiles instead of the em-dash placeholder.

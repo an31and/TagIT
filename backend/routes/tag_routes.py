@@ -164,19 +164,28 @@ async def get_public_tag(slug: str, request: Request) -> dict:
     if not doc:
         raise HTTPException(status_code=404, detail="Tag not found")
 
-    # Record the scan (rate-limited via hashed IP)
+    # Record the scan, de-duped within 30s per (tag_id, hashed-IP) so a
+    # finder hitting refresh doesn't pollute scan counts.
     ip = request.client.host if request.client else "0.0.0.0"
     ua = request.headers.get("user-agent", "")[:200]
-    await db.scans.insert_one(
-        {
-            "id": f"scan_{uuid.uuid4().hex[:12]}",
-            "tag_id": doc["id"],
-            "scanned_at": datetime.now(timezone.utc).isoformat(),
-            "approx_location": None,
-            "ip_hash": hash_ip(ip),
-            "user_agent": ua,
-        }
+    ip_h = hash_ip(ip)
+    now = datetime.now(timezone.utc)
+    cutoff = (now - timedelta(seconds=30)).isoformat()
+    recent_scan = await db.scans.find_one(
+        {"tag_id": doc["id"], "ip_hash": ip_h, "scanned_at": {"$gte": cutoff}},
+        {"_id": 0, "id": 1},
     )
+    if recent_scan is None:
+        await db.scans.insert_one(
+            {
+                "id": f"scan_{uuid.uuid4().hex[:12]}",
+                "tag_id": doc["id"],
+                "scanned_at": now.isoformat(),
+                "approx_location": None,
+                "ip_hash": ip_h,
+                "user_agent": ua,
+            }
+        )
 
     emergency = None
     if doc.get("type") == "medical":
