@@ -90,6 +90,8 @@ const dict = {
             how_step_3: "Get notified",
             how_step_3_desc:
                 "When someone scans, you get a message. Their location too — if they share it.",
+            tag_for_everything: "A tag for every thing",
+            how_it_works: "How it works",
         },
         auth: {
             sign_in_title: "Welcome back",
@@ -127,6 +129,19 @@ const dict = {
             view_finder_page: "Open finder page",
             download_pdf: "Download stickers",
             view_messages: "Messages",
+            preview: "Preview",
+            untitled: "Untitled tag",
+        },
+        inbox: {
+            empty: "No finder messages yet.",
+            from: "From",
+            view_location: "View location",
+            open_tag: "Open tag",
+            action_message: "Message",
+            action_wrong_parking: "Wrong parking",
+            action_headlight_on: "Headlight left on",
+            action_found: "Found",
+            action_call_request: "Call request",
         },
         tag_edit: {
             title: "Edit tag",
@@ -294,6 +309,8 @@ const dict = {
             how_step_3: "सूचना पाएँ",
             how_step_3_desc:
                 "जब कोई स्कैन करता है, आपको संदेश मिलता है। चाहें तो लोकेशन भी।",
+            tag_for_everything: "हर चीज़ के लिए एक टैग",
+            how_it_works: "यह कैसे काम करता है",
         },
         auth: {
             sign_in_title: "वापस स्वागत है",
@@ -330,6 +347,19 @@ const dict = {
             view_finder_page: "फ़ाइंडर पेज देखें",
             download_pdf: "स्टिकर डाउनलोड करें",
             view_messages: "संदेश",
+            preview: "प्रिव्यू",
+            untitled: "बिना नाम का टैग",
+        },
+        inbox: {
+            empty: "अभी कोई फ़ाइंडर संदेश नहीं।",
+            from: "भेजने वाला",
+            view_location: "लोकेशन देखें",
+            open_tag: "टैग खोलें",
+            action_message: "संदेश",
+            action_wrong_parking: "ग़लत पार्किंग",
+            action_headlight_on: "हेडलाइट चालू रह गई",
+            action_found: "मिल गया",
+            action_call_request: "कॉल अनुरोध",
         },
         tag_edit: {
             title: "टैग एडिट करें",

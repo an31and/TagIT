@@ -5,12 +5,12 @@ import { MapPin, MessageSquare } from "lucide-react";
 import api, { formatApiError } from "../lib/api";
 import { useI18n } from "../lib/i18n";
 
-const ACTION_COPY = {
-    message: "Message",
-    wrong_parking: "Wrong parking",
-    headlight_on: "Headlight left on",
-    found: "Found",
-    call_request: "Call request",
+const ACTION_KEYS = {
+    message: "inbox.action_message",
+    wrong_parking: "inbox.action_wrong_parking",
+    headlight_on: "inbox.action_headlight_on",
+    found: "inbox.action_found",
+    call_request: "inbox.action_call_request",
 };
 
 export default function InboxPage() {
@@ -51,7 +51,7 @@ function InboxBody({ msgs, tags, t }) {
         return (
             <div className="surface p-10 text-center">
                 <MessageSquare className="h-8 w-8 mx-auto text-muted-foreground" />
-                <p className="mt-3 text-muted-foreground">No finder messages yet.</p>
+                <p className="mt-3 text-muted-foreground">{t("inbox.empty")}</p>
             </div>
         );
     }
@@ -63,7 +63,7 @@ function InboxBody({ msgs, tags, t }) {
                     <div key={m.id} className="surface p-5 animate-rise" data-testid={`inbox-item-${m.id}`}>
                         <div className="flex items-center justify-between gap-3">
                             <div className="text-xs uppercase tracking-widest text-muted-foreground">
-                                {ACTION_COPY[m.action_type] || m.action_type}
+                                {ACTION_KEYS[m.action_type] ? t(ACTION_KEYS[m.action_type]) : m.action_type}
                             </div>
                             <div className="text-xs text-muted-foreground">
                                 {new Date(m.created_at).toLocaleString()}
@@ -74,7 +74,7 @@ function InboxBody({ msgs, tags, t }) {
                         </div>
                         {m.body && <p className="text-sm mt-2 whitespace-pre-wrap">{m.body}</p>}
                         <div className="text-xs text-muted-foreground mt-3 flex flex-wrap gap-3 items-center">
-                            {m.finder_name && <span>From: {m.finder_name}</span>}
+                            {m.finder_name && <span>{t("inbox.from")}: {m.finder_name}</span>}
                             {m.finder_contact && <span>· {m.finder_contact}</span>}
                             {m.location && (
                                 <a
@@ -83,12 +83,12 @@ function InboxBody({ msgs, tags, t }) {
                                     rel="noreferrer"
                                     className="inline-flex items-center gap-1 text-accent hover:underline"
                                 >
-                                    <MapPin className="h-3.5 w-3.5" /> View location
+                                    <MapPin className="h-3.5 w-3.5" /> {t("inbox.view_location")}
                                 </a>
                             )}
                             {tag && (
                                 <Link to={`/tags/${tag.id}`} className="ml-auto text-accent hover:underline">
-                                    Open tag
+                                    {t("inbox.open_tag")}
                                 </Link>
                             )}
                         </div>

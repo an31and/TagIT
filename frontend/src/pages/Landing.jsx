@@ -106,7 +106,7 @@ export default function LandingPage() {
                     <div className="lg:col-span-5">
                         <div className="surface p-8 sm:p-10 relative">
                             <div className="flex items-center justify-between mb-6">
-                                <div className="font-display font-bold text-lg">A tag for every thing</div>
+                                <div className="font-display font-bold text-lg">{t("landing.tag_for_everything")}</div>
                                 <ScanLine className="h-5 w-5 text-accent" />
                             </div>
                             <ul className="grid grid-cols-2 gap-3">
@@ -160,7 +160,7 @@ export default function LandingPage() {
 
             {/* How it works */}
             <section id="how-it-works" className="mx-auto max-w-6xl px-4 sm:px-8 py-16">
-                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">How it works</h2>
+                <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">{t("landing.how_it_works")}</h2>
                 <div className="mt-8 grid md:grid-cols-3 gap-6">
                     <Step n="1" icon={<Tag className="h-5 w-5" />} title={t("landing.how_step_1")} body={t("landing.how_step_1_desc")} />
                     <Step n="2" icon={<QrCode className="h-5 w-5" />} title={t("landing.how_step_2")} body={t("landing.how_step_2_desc")} />

@@ -204,7 +204,7 @@ function TagCard({ tag }) {
             <div>
                 <div className="text-xs uppercase tracking-widest text-muted-foreground">{t(`dashboard.${tag.type}`)}</div>
                 <div className="font-display text-lg font-bold leading-tight mt-1 line-clamp-2">
-                    {tag.display_name || tag.label || "Untitled tag"}
+                    {tag.display_name || tag.label || t("dashboard.untitled")}
                 </div>
                 <div className="text-xs text-muted-foreground mt-2 font-mono break-all">/tag/{tag.slug}</div>
             </div>
@@ -221,7 +221,7 @@ function TagCard({ tag }) {
                 </Link>
                 <a href={finderUrl} target="_blank" rel="noreferrer">
                     <Button variant="ghost" size="sm" className="rounded-full" data-testid={`preview-tag-${tag.id}`}>
-                        Preview
+                        {t("dashboard.preview")}
                     </Button>
                 </a>
             </div>
