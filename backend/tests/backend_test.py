@@ -190,6 +190,19 @@ class TestTagCRUD:
         assert r.status_code == 200
         assert r.headers.get("content-type", "").startswith("image/png")
         assert r.content[:4] == b"\x89PNG"
+        # Default preview is inline so the <img> tag renders it.
+        assert "inline" in r.headers.get("content-disposition", "inline")
+
+    def test_qr_png_download(self, admin_session):
+        tags = admin_session.get(f"{BASE_URL}/api/tags").json()
+        tag_id = tags[0]["id"]
+        r = admin_session.get(f"{BASE_URL}/api/tags/{tag_id}/qr.png?download=1")
+        assert r.status_code == 200
+        assert r.content[:4] == b"\x89PNG"
+        # ?download=1 forces a Save-As with a sensible filename.
+        cd = r.headers.get("content-disposition", "")
+        assert "attachment" in cd
+        assert ".png" in cd
 
 
 # ---------- 5. PDF generation ----------

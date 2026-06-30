@@ -122,7 +122,11 @@ async def delete_tag(tag_id: str, user: dict = Depends(_current_user_dep)) -> di
 
 
 @router.get("/tags/{tag_id}/qr.png")
-async def tag_qr_png(tag_id: str, user: dict = Depends(_current_user_dep)) -> StreamingResponse:
+async def tag_qr_png(
+    tag_id: str,
+    download: bool = False,
+    user: dict = Depends(_current_user_dep),
+) -> StreamingResponse:
     db = get_db()
     doc = await db.tags.find_one({"id": tag_id, "owner_id": user["id"]}, {"_id": 0})
     if not doc:
@@ -140,7 +144,16 @@ async def tag_qr_png(tag_id: str, user: dict = Depends(_current_user_dep)) -> St
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-    return StreamingResponse(buf, media_type="image/png")
+    # `inline` lets the <img> preview render; `attachment` (when ?download=1)
+    # gives the browser a sensible filename for a right-click/save or a
+    # programmatic download.
+    disposition = "attachment" if download else "inline"
+    filename = f"tagit-{doc['slug']}-qr.png"
+    return StreamingResponse(
+        buf,
+        media_type="image/png",
+        headers={"Content-Disposition": f'{disposition}; filename="{filename}"'},
+    )
 
 
 # ---------------------------------------------------------------------------
