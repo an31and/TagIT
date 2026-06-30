@@ -1,9 +1,6 @@
 # TagIT — privacy-first, no-app smart tags
 
 > Lose less. Help more.  
-> A free, public-service smart-tag ecosystem for Indian households.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 TagIT is a self-hostable web app + PWA that lets ordinary people stick a QR
 sticker on their bike, pet's collar, luggage, keys or wallet — and lets a
