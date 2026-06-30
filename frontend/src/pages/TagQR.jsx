@@ -1,11 +1,34 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Check, Copy, Download, Loader2, QrCode } from "lucide-react";
+import { toast } from "sonner";
 
 import { API_BASE } from "../lib/api";
 import { Button } from "../components/ui/button";
 import api, { formatApiError } from "../lib/api";
 import { useI18n } from "../lib/i18n";
+
+/**
+ * Stream a credentialed file URL to the user as a download.  We can't use a
+ * plain <a download> because the asset endpoints require the auth cookie and
+ * need their response turned into a blob to force a real "Save as" rather than
+ * a same-tab navigation.
+ */
+async function downloadFile(url, filename) {
+    const res = await fetch(url, { credentials: "include" });
+    if (!res.ok) {
+        throw new Error(`Request failed (${res.status})`);
+    }
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+}
 
 export default function TagQRPage() {
     const { id } = useParams();
@@ -23,6 +46,17 @@ export default function TagQRPage() {
             }
         })();
     }, [id]);
+
+    if (error && !tag) {
+        return (
+            <div className="max-w-3xl mx-auto" data-testid="qr-root">
+                <Link to="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+                    <ArrowLeft className="h-4 w-4" /> {t("common.back")}
+                </Link>
+                <p className="mt-6 text-sm text-destructive" data-testid="qr-error">{error}</p>
+            </div>
+        );
+    }
 
     if (!tag) {
         return <div className="text-muted-foreground animate-pulse-soft">{t("common.loading")}</div>;
@@ -44,7 +78,7 @@ export default function TagQRPage() {
                     <div className="bg-white p-4 rounded-lg shadow-sm">
                         <img
                             src={qrSrc}
-                            alt={`QR for ${tag.display_name}`}
+                            alt={`QR for ${tag.display_name || tag.label}`}
                             className="w-56 h-56"
                             data-testid="qr-image"
                             // Ensures we don't show stale caches between tag changes
@@ -61,6 +95,7 @@ export default function TagQRPage() {
                     >
                         {finderUrl}
                     </a>
+                    <CopyUrlButton url={finderUrl} />
                 </div>
 
                 <div className="space-y-4">
@@ -68,9 +103,31 @@ export default function TagQRPage() {
                         <h2 className="font-display text-xl font-bold">{t("qr.title")}</h2>
                         <p className="text-sm text-muted-foreground mt-1">{t("qr.tip")}</p>
                         <div className="mt-5 space-y-3">
-                            <PdfButton tagId={tag.id} layout="a4_stickers" label={t("qr.download_a4")} testId="dl-a4" />
-                            <PdfButton tagId={tag.id} layout="id_card" label={t("qr.download_id")} testId="dl-id" />
-                            <PdfButton tagId={tag.id} layout="keyring" label={t("qr.download_keyring")} testId="dl-keyring" />
+                            <DownloadButton
+                                url={`${qrSrc}?download=1`}
+                                filename={`tagit-${tag.slug}-qr.png`}
+                                label={t("qr.download_png")}
+                                testId="dl-png"
+                                icon={QrCode}
+                            />
+                            <DownloadButton
+                                url={`${API_BASE}/tags/${tag.id}/pdf?layout=a4_stickers`}
+                                filename={`tagit-${tag.slug}-a4_stickers.pdf`}
+                                label={t("qr.download_a4")}
+                                testId="dl-a4"
+                            />
+                            <DownloadButton
+                                url={`${API_BASE}/tags/${tag.id}/pdf?layout=id_card`}
+                                filename={`tagit-${tag.slug}-id_card.pdf`}
+                                label={t("qr.download_id")}
+                                testId="dl-id"
+                            />
+                            <DownloadButton
+                                url={`${API_BASE}/tags/${tag.id}/pdf?layout=keyring`}
+                                filename={`tagit-${tag.slug}-keyring.pdf`}
+                                label={t("qr.download_keyring")}
+                                testId="dl-keyring"
+                            />
                         </div>
                     </div>
                 </div>
@@ -81,31 +138,63 @@ export default function TagQRPage() {
     );
 }
 
-function PdfButton({ tagId, layout, label, testId }) {
-    const url = `${API_BASE}/tags/${tagId}/pdf?layout=${layout}`;
-    const onClick = async (e) => {
-        e.preventDefault();
+function DownloadButton({ url, filename, label, testId, icon: Icon = Download }) {
+    const { t } = useI18n();
+    const [busy, setBusy] = useState(false);
+
+    const onClick = async () => {
+        if (busy) return;
+        setBusy(true);
         try {
-            // Use fetch so we send the auth cookie
-            const res = await fetch(url, { credentials: "include" });
-            if (!res.ok) throw new Error("Could not generate PDF");
-            const blob = await res.blob();
-            const dlUrl = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = dlUrl;
-            a.download = `tagit-${layout}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(dlUrl);
+            await downloadFile(url, filename);
+            toast.success(t("qr.downloaded"));
         } catch (err) {
-            alert(err.message);
+            toast.error(t("qr.download_failed"));
+            console.error("Download failed:", err);
+        } finally {
+            setBusy(false);
         }
     };
+
     return (
-        <Button onClick={onClick} variant="outline" className="w-full justify-between rounded-full" data-testid={testId}>
+        <Button
+            onClick={onClick}
+            disabled={busy}
+            variant="outline"
+            className="w-full justify-between rounded-full"
+            data-testid={testId}
+        >
             <span>{label}</span>
-            <Download className="h-4 w-4" />
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
+        </Button>
+    );
+}
+
+function CopyUrlButton({ url }) {
+    const { t } = useI18n();
+    const [copied, setCopied] = useState(false);
+
+    const onClick = async () => {
+        try {
+            await navigator.clipboard.writeText(url);
+            setCopied(true);
+            toast.success(t("qr.copied"));
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            toast.error(t("qr.copy_failed"));
+        }
+    };
+
+    return (
+        <Button
+            onClick={onClick}
+            variant="ghost"
+            size="sm"
+            className="mt-3 rounded-full text-xs"
+            data-testid="qr-copy-url"
+        >
+            {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            <span className="ml-1.5">{copied ? t("qr.copied") : t("qr.copy_url")}</span>
         </Button>
     );
 }
