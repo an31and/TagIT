@@ -148,7 +148,7 @@ async def tag_qr_png(
     # gives the browser a sensible filename for a right-click/save or a
     # programmatic download.
     disposition = "attachment" if download else "inline"
-    filename = f"tagit-{doc['slug']}-qr.png"
+    filename = f"infotag-{doc['slug']}-qr.png"
     return StreamingResponse(
         buf,
         media_type="image/png",

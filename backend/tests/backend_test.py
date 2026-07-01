@@ -1,5 +1,5 @@
 """
-TagIT — Backend API regression tests.
+InfoTag — Backend API regression tests.
 Covers: health/feature flags, JWT auth (register/login/logout/me),
 tag CRUD, public finder + claim flow, messages + inbox, PDFs,
 data isolation between users, manifest/sw, and integration placeholders.
@@ -13,7 +13,7 @@ import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com").rstrip("/")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "TagITAdmin@2026")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "InfoTagAdmin@2026")
 
 
 # ---------- Fixtures ----------
@@ -42,7 +42,7 @@ class TestHealth:
     def test_root(self):
         r = requests.get(f"{BASE_URL}/api")
         assert r.status_code == 200
-        assert r.json().get("name") == "TagIT API"
+        assert r.json().get("name") == "InfoTag API"
 
     def test_health(self):
         r = requests.get(f"{BASE_URL}/api/health")
@@ -359,8 +359,8 @@ class TestPWA:
         r = requests.get(f"{BASE_URL}/manifest.json")
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data.get("name", "").startswith("TagIT")
-        assert data.get("short_name") == "TagIT"
+        assert data.get("name", "").startswith("InfoTag")
+        assert data.get("short_name") == "InfoTag"
         assert data.get("theme_color", "").lower() == "#0f172a"
 
     def test_service_worker(self):

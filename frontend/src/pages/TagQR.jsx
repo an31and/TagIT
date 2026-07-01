@@ -105,26 +105,26 @@ export default function TagQRPage() {
                         <div className="mt-5 space-y-3">
                             <DownloadButton
                                 url={`${qrSrc}?download=1`}
-                                filename={`tagit-${tag.slug}-qr.png`}
+                                filename={`infotag-${tag.slug}-qr.png`}
                                 label={t("qr.download_png")}
                                 testId="dl-png"
                                 icon={QrCode}
                             />
                             <DownloadButton
                                 url={`${API_BASE}/tags/${tag.id}/pdf?layout=a4_stickers`}
-                                filename={`tagit-${tag.slug}-a4_stickers.pdf`}
+                                filename={`infotag-${tag.slug}-a4_stickers.pdf`}
                                 label={t("qr.download_a4")}
                                 testId="dl-a4"
                             />
                             <DownloadButton
                                 url={`${API_BASE}/tags/${tag.id}/pdf?layout=id_card`}
-                                filename={`tagit-${tag.slug}-id_card.pdf`}
+                                filename={`infotag-${tag.slug}-id_card.pdf`}
                                 label={t("qr.download_id")}
                                 testId="dl-id"
                             />
                             <DownloadButton
                                 url={`${API_BASE}/tags/${tag.id}/pdf?layout=keyring`}
-                                filename={`tagit-${tag.slug}-keyring.pdf`}
+                                filename={`infotag-${tag.slug}-keyring.pdf`}
                                 label={t("qr.download_keyring")}
                                 testId="dl-keyring"
                             />

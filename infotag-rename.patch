@@ -1,0 +1,1149 @@
+From 7291bbb2b9ee7c5002cfb534b17fd066efeee509 Mon Sep 17 00:00:00 2001
+From: InfoTag rename <dev@example.com>
+Date: Wed, 1 Jul 2026 06:43:25 +0000
+Subject: [PATCH 1/2] Rebrand: TagIT -> InfoTag across code, UI, PWA, tests
+ (domain tagit.in left intact by design)
+
+---
+ CONTRIBUTING.md                               |  8 ++++----
+ LICENSE                                       |  2 +-
+ README.md                                     |  8 ++++----
+ auth_testing.md                               |  4 ++--
+ backend/README.md                             |  4 ++--
+ backend/auth.py                               |  2 +-
+ backend/db.py                                 |  2 +-
+ backend/models.py                             |  2 +-
+ backend/routes/auth_routes.py                 |  2 +-
+ backend/routes/finder_ssr.py                  | 20 +++++++++----------
+ backend/routes/message_routes.py              |  2 +-
+ backend/routes/pdf_routes.py                  | 10 +++++-----
+ backend/routes/sponsor_routes.py              |  2 +-
+ backend/routes/tag_routes.py                  |  2 +-
+ backend/server.py                             |  8 ++++----
+ backend/tests/backend_test.py                 | 10 +++++-----
+ backend/tests/test_finder_ssr.py              |  4 ++--
+ backend/tests/test_iteration2_new_features.py |  4 ++--
+ design_guidelines.json                        |  2 +-
+ docker-compose.yml                            |  6 +++---
+ frontend/README.md                            |  2 +-
+ frontend/public/index.html                    |  4 ++--
+ frontend/public/manifest.json                 |  4 ++--
+ frontend/public/sw.js                         |  4 ++--
+ frontend/src/App.css                          |  2 +-
+ frontend/src/components/AppShell.jsx          |  2 +-
+ frontend/src/components/SponsorSection.jsx    |  2 +-
+ frontend/src/components/auth/AuthParts.jsx    |  2 +-
+ frontend/src/index.css                        |  2 +-
+ frontend/src/lib/i18n.jsx                     | 20 +++++++++----------
+ frontend/src/lib/theme.jsx                    |  4 ++--
+ frontend/src/pages/Auth.jsx                   |  2 +-
+ frontend/src/pages/Landing.jsx                |  4 ++--
+ frontend/src/pages/Legal.jsx                  | 12 +++++------
+ frontend/src/pages/Settings.jsx               |  2 +-
+ frontend/src/pages/TagQR.jsx                  |  8 ++++----
+ memory/PRD.md                                 |  4 ++--
+ 37 files changed, 92 insertions(+), 92 deletions(-)
+
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index c56862f..64a6170 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -1,6 +1,6 @@
+-# Contributing to TagIT
++# Contributing to InfoTag
+ 
+-Thanks for wanting to help. TagIT is a free, public-service project — every
++Thanks for wanting to help. InfoTag is a free, public-service project — every
+ small fix matters.
+ 
+ ## Code of conduct
+@@ -9,8 +9,8 @@ hold each other to the same standard.
+ 
+ ## Getting set up
+ ```bash
+-git clone https://github.com/<you>/tagit
+-cd tagit
++git clone https://github.com/<you>/infotag
++cd infotag
+ cp backend/.env.example backend/.env
+ docker compose up --build
+ ```
+diff --git a/LICENSE b/LICENSE
+index 327cbac..1a5652b 100644
+--- a/LICENSE
++++ b/LICENSE
+@@ -1,6 +1,6 @@
+ MIT License
+ 
+-Copyright (c) 2026 Anand Lakhera and TagIT contributors
++Copyright (c) 2026 Anand Lakhera and InfoTag contributors
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+diff --git a/README.md b/README.md
+index a23f21e..678d7eb 100644
+--- a/README.md
++++ b/README.md
+@@ -1,8 +1,8 @@
+-# TagIT — privacy-first, no-app smart tags
++# InfoTag — privacy-first, no-app smart tags
+ 
+ > Lose less. Help more.  
+ 
+-TagIT is a self-hostable web app + PWA that lets ordinary people stick a QR
++InfoTag is a self-hostable web app + PWA that lets ordinary people stick a QR
+ sticker on their bike, pet's collar, luggage, keys or wallet — and lets a
+ kind person reach the owner if it's ever lost, **without installing an app**.
+ 
+@@ -12,7 +12,7 @@ group, allergies and an emergency contact in seconds.
+ ## Why
+ 
+ Most "smart tag" products lock finders into an app, expose owners' phone
+-numbers, or charge a subscription. TagIT does none of those.
++numbers, or charge a subscription. InfoTag does none of those.
+ 
+ - **No app for finders.** Any phone camera. Open web page. Done.
+ - **PWA for owners.** Installable on Android/iOS via the web manifest.
+@@ -58,7 +58,7 @@ Open `http://localhost:3000`. Sign in with the admin you set in `backend/.env`
+ 
+ ```bash
+ # 1. MongoDB
+-mongod --dbpath /tmp/tagit-db &
++mongod --dbpath /tmp/infotag-db &
+ 
+ # 2. Backend
+ cd backend
+diff --git a/auth_testing.md b/auth_testing.md
+index 9fe8275..e178b80 100644
+--- a/auth_testing.md
++++ b/auth_testing.md
+@@ -1,4 +1,4 @@
+-# TagIT Auth Testing Playbook
++# InfoTag Auth Testing Playbook
+ 
+ Two auth paths converge on the same JWT cookie session:
+ 
+@@ -20,7 +20,7 @@ Expect bcrypt hash starting with `$2b$` for the seeded admin.
+ API=$(grep REACT_APP_BACKEND_URL /app/frontend/.env | cut -d= -f2)
+ curl -c /tmp/c.txt -X POST "$API/api/auth/login" \
+   -H "Content-Type: application/json" \
+-  -d '{"email":"anand@tagit.in","password":"TagITAdmin@2026"}'
++  -d '{"email":"anand@tagit.in","password":"InfoTagAdmin@2026"}'
+ curl -b /tmp/c.txt "$API/api/auth/me"
+ curl -b /tmp/c.txt "$API/api/tags"           # should list demo tags
+ ```
+diff --git a/backend/README.md b/backend/README.md
+index 820f69e..103d471 100644
+--- a/backend/README.md
++++ b/backend/README.md
+@@ -1,6 +1,6 @@
+-# TagIT — backend (FastAPI)
++# InfoTag — backend (FastAPI)
+ 
+-Async FastAPI service for the TagIT ecosystem.
++Async FastAPI service for the InfoTag ecosystem.
+ 
+ ## Stack
+ - FastAPI + Pydantic v2
+diff --git a/backend/auth.py b/backend/auth.py
+index ae987a0..35c422a 100644
+--- a/backend/auth.py
++++ b/backend/auth.py
+@@ -102,7 +102,7 @@ def clear_auth_cookies(response: Response) -> None:
+ 
+ def hash_ip(ip: str) -> str:
+     """Stable hash so we never store raw IPs but can still rate-limit."""
+-    salt = os.environ.get("JWT_SECRET", "tagit")
++    salt = os.environ.get("JWT_SECRET", "infotag")
+     return hashlib.sha256(f"{salt}:{ip}".encode("utf-8")).hexdigest()[:32]
+ 
+ 
+diff --git a/backend/db.py b/backend/db.py
+index f3808db..c2b86d7 100644
+--- a/backend/db.py
++++ b/backend/db.py
+@@ -1,4 +1,4 @@
+-"""MongoDB connection + index/seed setup for TagIT."""
++"""MongoDB connection + index/seed setup for InfoTag."""
+ from __future__ import annotations
+ 
+ import os
+diff --git a/backend/models.py b/backend/models.py
+index d1a914a..5e16ec3 100644
+--- a/backend/models.py
++++ b/backend/models.py
+@@ -1,4 +1,4 @@
+-"""Pydantic models for TagIT.
++"""Pydantic models for InfoTag.
+ 
+ We keep MongoDB documents flat and JSON-serialisable.  All ObjectIds are
+ avoided in favour of UUID strings stored in the document body so the API
+diff --git a/backend/routes/auth_routes.py b/backend/routes/auth_routes.py
+index 9860e03..df18141 100644
+--- a/backend/routes/auth_routes.py
++++ b/backend/routes/auth_routes.py
+@@ -122,7 +122,7 @@ async def me(user: dict = Depends(_current_user_dep)) -> dict:
+ 
+ @router.post("/google/session")
+ async def google_session(payload: dict, response: Response) -> dict:
+-    """Exchange Emergent Google session_id for a TagIT JWT cookie session.
++    """Exchange Emergent Google session_id for a InfoTag JWT cookie session.
+ 
+     REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS,
+     THIS BREAKS THE AUTH.  The frontend passes us the session_id from the URL
+diff --git a/backend/routes/finder_ssr.py b/backend/routes/finder_ssr.py
+index de286cc..20ac06f 100644
+--- a/backend/routes/finder_ssr.py
++++ b/backend/routes/finder_ssr.py
+@@ -53,8 +53,8 @@ STRINGS: dict[str, dict[str, str]] = {
+         "unclaimed_title": "This tag isn't claimed yet",
+         "unclaimed_body": "If this tag belongs to you, sign in to claim it.",
+         "tag_not_found": "We couldn't find this tag.",
+-        "tag_not_found_help": "The QR may have been misprinted, or this code isn't a TagIT.",
+-        "powered_by": "Powered by TagIT — privacy-first, no app needed.",
++        "tag_not_found_help": "The QR may have been misprinted, or this code isn't a InfoTag.",
++        "powered_by": "Powered by InfoTag — privacy-first, no app needed.",
+         "made_in_india": "Made in India",
+         "lang_switch": "हिन्दी",
+         "back": "← Back",
+@@ -87,7 +87,7 @@ STRINGS: dict[str, dict[str, str]] = {
+         "unclaimed_body": "अगर यह आपका है, तो साइन इन करके इसे क्लेम करें।",
+         "tag_not_found": "यह टैग नहीं मिला।",
+         "tag_not_found_help": "QR ग़लत प्रिंट हुआ हो सकता है।",
+-        "powered_by": "TagIT — गोपनीयता-प्रथम, कोई ऐप नहीं।",
++        "powered_by": "InfoTag — गोपनीयता-प्रथम, कोई ऐप नहीं।",
+         "made_in_india": "मेड इन इंडिया",
+         "lang_switch": "English",
+         "back": "← वापस",
+@@ -174,7 +174,7 @@ body.em{background:#fef2f2}
+ """
+ 
+ 
+-def render_layout(*, lang: str, body: str, emergency: bool = False, title: str = "TagIT") -> str:
++def render_layout(*, lang: str, body: str, emergency: bool = False, title: str = "InfoTag") -> str:
+     other_lang = "hi" if lang == "en" else "en"
+     body_class = "em" if emergency else ""
+     return f"""<!doctype html>
+@@ -185,15 +185,15 @@ def render_layout(*, lang: str, body: str, emergency: bool = False, title: str =
+ <meta name="theme-color" content="{'#dc2626' if emergency else '#0F172A'}">
+ <meta name="referrer" content="no-referrer">
+ <meta name="robots" content="noindex,nofollow">
+-<title>{esc(title)} — TagIT</title>
+-<meta name="description" content="A kind person scanned this TagIT. Help reunite an item with its owner.">
++<title>{esc(title)} — InfoTag</title>
++<meta name="description" content="A kind person scanned this InfoTag. Help reunite an item with its owner.">
+ <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F172A'/%3E%3Cpath d='M21 11l-4-4-9 9v4h4l9-9z' stroke='%23E25822' stroke-width='2.4' fill='none' stroke-linejoin='round'/%3E%3C/svg%3E">
+ <style>{CSS}</style>
+ <script>document.documentElement.className='js'</script>
+ </head>
+ <body class="{body_class}">
+ <header><div class="wrap row">
+-<a class="brand" href="/" data-testid="finder-brand"><span aria-hidden="true" class="icon-tag">⛓︎</span>Tag<span class="it">IT</span></a>
++<a class="brand" href="/" data-testid="finder-brand"><span aria-hidden="true" class="icon-tag">⛓︎</span>Info<span class="it">Tag</span></a>
+ <a class="lang" href="?lang={other_lang}" data-testid="finder-lang-switch">{esc(STRINGS[lang]['lang_switch'])}</a>
+ </div></header>
+ <main class="wrap">{body}</main>
+@@ -304,7 +304,7 @@ def render_claimed(lang: str, doc: dict) -> str:
+     body = f"""
+ <div class="card" data-testid="finder-claimed">
+ <div class="kicker">{esc(doc.get('type','item').upper())}</div>
+-<h1 data-testid="finder-display-name">{esc(display_name) or 'TagIT'}</h1>
++<h1 data-testid="finder-display-name">{esc(display_name) or 'InfoTag'}</h1>
+ <div class="muted" style="margin-top:4px">{esc(t(lang,'header'))}</div>
+ {lost_banner}
+ {note_html}
+@@ -330,7 +330,7 @@ navigator.geolocation.getCurrentPosition(function(p){{
+ var v=p.coords.latitude+','+p.coords.longitude;
+ document.querySelectorAll('[data-loc-target]').forEach(function(el){{el.value=v}});
+ }},function(){{}},{{timeout:5000,enableHighAccuracy:false}});}})();</script>"""
+-    return render_layout(lang=lang, body=body, title=display_name or "TagIT")
++    return render_layout(lang=lang, body=body, title=display_name or "InfoTag")
+ 
+ 
+ def render_emergency(lang: str, doc: dict, em: dict) -> str:
+@@ -528,6 +528,6 @@ async def finder_action(
+         )
+         if loc:
+             text += f"Location: https://maps.google.com/?q={loc['lat']},{loc['lng']}\n"
+-        send_email(owner["email"], f"[TagIT] {action_type.replace('_', ' ')} on your tag", text)
++        send_email(owner["email"], f"[InfoTag] {action_type.replace('_', ' ')} on your tag", text)
+ 
+     return HTMLResponse(render_thanks(lang, slug))
+diff --git a/backend/routes/message_routes.py b/backend/routes/message_routes.py
+index f8f324f..a812024 100644
+--- a/backend/routes/message_routes.py
++++ b/backend/routes/message_routes.py
+@@ -102,7 +102,7 @@ async def post_finder_message(
+         )
+         if msg.get("location"):
+             link += f"Location: https://maps.google.com/?q={msg['location'].get('lat')},{msg['location'].get('lng')}\n"
+-        send_email(owner["email"], f"[TagIT] {payload.action_type.replace('_', ' ')} on your tag", link)
++        send_email(owner["email"], f"[InfoTag] {payload.action_type.replace('_', ' ')} on your tag", link)
+ 
+     return {
+         "id": msg["id"],
+diff --git a/backend/routes/pdf_routes.py b/backend/routes/pdf_routes.py
+index 746893c..d20d118 100644
+--- a/backend/routes/pdf_routes.py
++++ b/backend/routes/pdf_routes.py
+@@ -71,7 +71,7 @@ async def generate_pdf(
+     url = f"{_site_url()}/api/finder/{doc['slug']}"
+     pil = _qr_image(url)
+     caption = CONTEXT_CAPTIONS.get(doc.get("type", "general"), "Scan if found")
+-    label = doc.get("display_name") or doc.get("label") or "TagIT"
++    label = doc.get("display_name") or doc.get("label") or "InfoTag"
+ 
+     buf = io.BytesIO()
+     if layout == "a4_stickers":
+@@ -83,7 +83,7 @@ async def generate_pdf(
+     else:
+         raise HTTPException(status_code=400, detail="Unknown layout")
+     buf.seek(0)
+-    filename = f"tagit-{doc['slug']}-{layout}.pdf"
++    filename = f"infotag-{doc['slug']}-{layout}.pdf"
+     return StreamingResponse(
+         buf,
+         media_type="application/pdf",
+@@ -127,7 +127,7 @@ def _draw_a4_stickers(buf, pil, slug, label, caption, tag_type) -> None:
+             # Header
+             c.setFillColor(EMERGENCY_RED if tag_type == "medical" else ASHOKA_NAVY)
+             c.setFont("Helvetica-Bold", 9)
+-            c.drawCentredString(x + cell_w / 2, y + cell_h - 8 * mm, "TagIT · tagit.in")
++            c.drawCentredString(x + cell_w / 2, y + cell_h - 8 * mm, "InfoTag · tagit.in")
+             # Caption
+             c.setFillColor(black)
+             c.setFont("Helvetica-Bold", 8)
+@@ -164,7 +164,7 @@ def _draw_id_card(buf, pil, slug, label, caption, tag_type) -> None:
+     c.saveState()
+     c.translate(x + band_w / 2, y + card_h / 2)
+     c.rotate(90)
+-    c.drawCentredString(0, -3, "TagIT · MADE IN INDIA")
++    c.drawCentredString(0, -3, "InfoTag · MADE IN INDIA")
+     c.restoreState()
+ 
+     # QR
+@@ -212,6 +212,6 @@ def _draw_keyring(buf, pil, slug, label, caption, tag_type) -> None:
+             _draw_qr(c, pil, x + (size - qr_size) / 2, y + (size - qr_size) / 2 + 2 * mm, qr_size)
+             c.setFillColor(EMERGENCY_RED if tag_type == "medical" else ASHOKA_NAVY)
+             c.setFont("Helvetica-Bold", 6)
+-            c.drawCentredString(x + size / 2, y + 3.5 * mm, "TagIT · tagit.in")
++            c.drawCentredString(x + size / 2, y + 3.5 * mm, "InfoTag · tagit.in")
+     c.showPage()
+     c.save()
+diff --git a/backend/routes/sponsor_routes.py b/backend/routes/sponsor_routes.py
+index c1dac34..f7fd9ff 100644
+--- a/backend/routes/sponsor_routes.py
++++ b/backend/routes/sponsor_routes.py
+@@ -1,6 +1,6 @@
+ """Sponsor a tag — civic enhancement.
+ 
+-A free public-service product like TagIT scales when companies and citizens
++A free public-service product like InfoTag scales when companies and citizens
+ sponsor printed-sticker batches that get distributed for free (e.g. at
+ pet adoption camps, RTOs, hospitals).  This module collects sponsor
+ intents so we can stay zero-cost for end users.
+diff --git a/backend/routes/tag_routes.py b/backend/routes/tag_routes.py
+index d98af48..e07d9d0 100644
+--- a/backend/routes/tag_routes.py
++++ b/backend/routes/tag_routes.py
+@@ -148,7 +148,7 @@ async def tag_qr_png(
+     # gives the browser a sensible filename for a right-click/save or a
+     # programmatic download.
+     disposition = "attachment" if download else "inline"
+-    filename = f"tagit-{doc['slug']}-qr.png"
++    filename = f"infotag-{doc['slug']}-qr.png"
+     return StreamingResponse(
+         buf,
+         media_type="image/png",
+diff --git a/backend/server.py b/backend/server.py
+index 8cbd3bd..7ea5c65 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -1,4 +1,4 @@
+-"""TagIT — FastAPI entrypoint."""
++"""InfoTag — FastAPI entrypoint."""
+ from __future__ import annotations
+ 
+ from dotenv import load_dotenv
+@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
+     await ensure_indexes(db)
+     await seed_admin_and_demo(db)
+     logger.info(
+-        "TagIT API ready. Email=%s WhatsApp=%s Twilio=%s",
++        "InfoTag API ready. Email=%s WhatsApp=%s Twilio=%s",
+         email_enabled(), whatsapp_enabled(), twilio_enabled(),
+     )
+     yield
+@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
+ 
+ 
+ app = FastAPI(
+-    title="TagIT",
++    title="InfoTag",
+     version="0.1.0",
+     docs_url="/docs",
+     redoc_url="/redoc",
+@@ -76,7 +76,7 @@ app.include_router(finder_ssr_router)
+ 
+ @app.get("/api")
+ async def root() -> dict:
+-    return {"name": "TagIT API", "tagline": "Privacy-first, no-app, public-service smart tags.", "made_in": "India", "docs": "/docs"}
++    return {"name": "InfoTag API", "tagline": "Privacy-first, no-app, public-service smart tags.", "made_in": "India", "docs": "/docs"}
+ 
+ 
+ @app.get("/api/health")
+diff --git a/backend/tests/backend_test.py b/backend/tests/backend_test.py
+index 7a862e6..f86f924 100644
+--- a/backend/tests/backend_test.py
++++ b/backend/tests/backend_test.py
+@@ -1,5 +1,5 @@
+ """
+-TagIT — Backend API regression tests.
++InfoTag — Backend API regression tests.
+ Covers: health/feature flags, JWT auth (register/login/logout/me),
+ tag CRUD, public finder + claim flow, messages + inbox, PDFs,
+ data isolation between users, manifest/sw, and integration placeholders.
+@@ -13,7 +13,7 @@ import requests
+ 
+ BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com").rstrip("/")
+ ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
+-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "TagITAdmin@2026")
++ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "InfoTagAdmin@2026")
+ 
+ 
+ # ---------- Fixtures ----------
+@@ -42,7 +42,7 @@ class TestHealth:
+     def test_root(self):
+         r = requests.get(f"{BASE_URL}/api")
+         assert r.status_code == 200
+-        assert r.json().get("name") == "TagIT API"
++        assert r.json().get("name") == "InfoTag API"
+ 
+     def test_health(self):
+         r = requests.get(f"{BASE_URL}/api/health")
+@@ -359,8 +359,8 @@ class TestPWA:
+         r = requests.get(f"{BASE_URL}/manifest.json")
+         assert r.status_code == 200, r.text
+         data = r.json()
+-        assert data.get("name", "").startswith("TagIT")
+-        assert data.get("short_name") == "TagIT"
++        assert data.get("name", "").startswith("InfoTag")
++        assert data.get("short_name") == "InfoTag"
+         assert data.get("theme_color", "").lower() == "#0f172a"
+ 
+     def test_service_worker(self):
+diff --git a/backend/tests/test_finder_ssr.py b/backend/tests/test_finder_ssr.py
+index 7c26f92..fe799a9 100644
+--- a/backend/tests/test_finder_ssr.py
++++ b/backend/tests/test_finder_ssr.py
+@@ -15,7 +15,7 @@ import requests
+ 
+ BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com").rstrip("/")
+ ADMIN_EMAIL = "anand@tagit.in"
+-ADMIN_PASSWORD = "TagITAdmin@2026"
++ADMIN_PASSWORD = "InfoTagAdmin@2026"
+ 
+ 
+ @pytest.fixture(scope="module")
+@@ -48,7 +48,7 @@ class TestSSRVehicle:
+         assert "text/html" in ct, f"content-type={ct}"
+         html = r.text
+         # brand
+-        assert "TagIT" in html or "Tag<span" in html
++        assert "InfoTag" in html or "Info<span" in html
+         assert 'data-testid="finder-brand"' in html
+         # quick action buttons
+         assert 'data-testid="finder-action-wrong_parking"' in html
+diff --git a/backend/tests/test_iteration2_new_features.py b/backend/tests/test_iteration2_new_features.py
+index c1d2aa2..b64c539 100644
+--- a/backend/tests/test_iteration2_new_features.py
++++ b/backend/tests/test_iteration2_new_features.py
+@@ -1,5 +1,5 @@
+ """
+-TagIT — Iteration-2 new-features tests.
++InfoTag — Iteration-2 new-features tests.
+ 
+ Covers ONLY what changed in this iteration (per review request):
+   - Async google session (httpx, non-blocking)
+@@ -22,7 +22,7 @@ BASE_URL = os.environ.get(
+ ).rstrip("/")
+ 
+ ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
+-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "TagITAdmin@2026")
++ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "InfoTagAdmin@2026")
+ 
+ 
+ # ---------- Fixtures ----------
+diff --git a/design_guidelines.json b/design_guidelines.json
+index b5cd0e8..da1d2e8 100644
+--- a/design_guidelines.json
++++ b/design_guidelines.json
+@@ -1,5 +1,5 @@
+ {
+-  "project_name": "TagIT",
++  "project_name": "InfoTag",
+   "theme": "light_dark_toggle",
+   "archetype": "1_organic_earthy_mixed_with_swiss_clarity",
+   "design_philosophy": {
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 660a5c7..5736e66 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -10,7 +10,7 @@ services:
+     image: mongo:7
+     restart: unless-stopped
+     volumes:
+-      - tagit_mongo:/data/db
++      - infotag_mongo:/data/db
+     ports:
+       - "27017:27017"
+ 
+@@ -20,7 +20,7 @@ services:
+     env_file: ./backend/.env
+     environment:
+       MONGO_URL: "mongodb://mongo:27017"
+-      DB_NAME: "tagit"
++      DB_NAME: "infotag"
+       CORS_ORIGINS: "http://localhost:3000"
+     depends_on:
+       - mongo
+@@ -39,4 +39,4 @@ services:
+       - "3000:3000"
+ 
+ volumes:
+-  tagit_mongo:
++  infotag_mongo:
+diff --git a/frontend/README.md b/frontend/README.md
+index 02fa3cd..7776987 100644
+--- a/frontend/README.md
++++ b/frontend/README.md
+@@ -1,4 +1,4 @@
+-# TagIT — frontend (React PWA)
++# InfoTag — frontend (React PWA)
+ 
+ React + Tailwind PWA. Installable on Android/iOS via the web manifest, but
+ **finders never need to install anything** — they just open the QR URL.
+diff --git a/frontend/public/index.html b/frontend/public/index.html
+index 69733db..d8fea10 100644
+--- a/frontend/public/index.html
++++ b/frontend/public/index.html
+@@ -5,13 +5,13 @@
+         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+         <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: light)" />
+         <meta name="theme-color" content="#09090B" media="(prefers-color-scheme: dark)" />
+-        <meta name="description" content="TagIT — privacy-first, no-app smart tags. Free public service. Made in India." />
++        <meta name="description" content="InfoTag — privacy-first, no-app smart tags. Free public service. Made in India." />
+         <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F172A'/%3E%3Cpath d='M21 11l-4-4-9 9v4h4l9-9z' stroke='%23E25822' stroke-width='2.4' fill='none' stroke-linejoin='round'/%3E%3Ccircle cx='14' cy='14' r='1.6' fill='%23E25822'/%3E%3C/svg%3E" />
+         <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F172A'/%3E%3Cpath d='M21 11l-4-4-9 9v4h4l9-9z' stroke='%23E25822' stroke-width='2.4' fill='none' stroke-linejoin='round'/%3E%3Ccircle cx='14' cy='14' r='1.6' fill='%23E25822'/%3E%3C/svg%3E" />
+         <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+         <link rel="preconnect" href="https://fonts.googleapis.com" />
+         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+-        <title>TagIT — Privacy-first smart tags</title>
++        <title>InfoTag — Privacy-first smart tags</title>
+         <script>
+             window.addEventListener("error", function (e) {
+                 if (
+diff --git a/frontend/public/manifest.json b/frontend/public/manifest.json
+index 60d2a88..4c0135e 100644
+--- a/frontend/public/manifest.json
++++ b/frontend/public/manifest.json
+@@ -1,6 +1,6 @@
+ {
+-    "name": "TagIT — Privacy-first smart tags",
+-    "short_name": "TagIT",
++    "name": "InfoTag — Privacy-first smart tags",
++    "short_name": "InfoTag",
+     "description": "Free, no-app, privacy-first smart tags for vehicles, pets, luggage, keys and medical IDs. Made in India.",
+     "start_url": "/dashboard",
+     "scope": "/",
+diff --git a/frontend/public/sw.js b/frontend/public/sw.js
+index 3fa8604..5ccb704 100644
+--- a/frontend/public/sw.js
++++ b/frontend/public/sw.js
+@@ -1,6 +1,6 @@
+-// TagIT — lightweight service worker.
++// InfoTag — lightweight service worker.
+ // Caches the app shell only; never the API responses.
+-const CACHE = "tagit-shell-v1";
++const CACHE = "infotag-shell-v1";
+ const SHELL = ["/", "/index.html", "/manifest.json"];
+ 
+ self.addEventListener("install", (event) => {
+diff --git a/frontend/src/App.css b/frontend/src/App.css
+index ddee62d..760a626 100644
+--- a/frontend/src/App.css
++++ b/frontend/src/App.css
+@@ -1,4 +1,4 @@
+-/* TagIT — minimal page-level styles */
++/* InfoTag — minimal page-level styles */
+ .App {
+     min-height: 100vh;
+ }
+diff --git a/frontend/src/components/AppShell.jsx b/frontend/src/components/AppShell.jsx
+index b9b56ae..a1b815b 100644
+--- a/frontend/src/components/AppShell.jsx
++++ b/frontend/src/components/AppShell.jsx
+@@ -32,7 +32,7 @@ export function AppShell() {
+                     >
+                         <Tag className="h-5 w-5 text-accent" strokeWidth={2.5} />
+                         <span>
+-                            Tag<span className="text-accent">IT</span>
++                            Info<span className="text-accent">Tag</span>
+                         </span>
+                     </Link>
+                     <nav className="hidden md:flex items-center gap-1 text-sm">
+diff --git a/frontend/src/components/SponsorSection.jsx b/frontend/src/components/SponsorSection.jsx
+index 9b7ef8f..8088625 100644
+--- a/frontend/src/components/SponsorSection.jsx
++++ b/frontend/src/components/SponsorSection.jsx
+@@ -53,7 +53,7 @@ export function SponsorSection() {
+                         Fund printed stickers, free for an Indian family.
+                     </h2>
+                     <p className="mt-4 text-muted-foreground">
+-                        TagIT is and will always be free. But weather-proof printed stickers cost money. Sponsor a batch — we'll add a small "Sponsored by you" footer on the PDF and ship them to RTOs, pet shelters, hospitals and senior-citizen groups.
++                        InfoTag is and will always be free. But weather-proof printed stickers cost money. Sponsor a batch — we'll add a small "Sponsored by you" footer on the PDF and ship them to RTOs, pet shelters, hospitals and senior-citizen groups.
+                     </p>
+                     {stats && (
+                         <div className="mt-6 flex gap-6">
+diff --git a/frontend/src/components/auth/AuthParts.jsx b/frontend/src/components/auth/AuthParts.jsx
+index e72f540..a431826 100644
+--- a/frontend/src/components/auth/AuthParts.jsx
++++ b/frontend/src/components/auth/AuthParts.jsx
+@@ -52,7 +52,7 @@ export function AuthVisualPanel({ t }) {
+             <div className="absolute inset-0 bg-grid opacity-10" />
+             <Link to="/" className="relative inline-flex items-center gap-2 font-display font-black text-2xl" data-testid="auth-brand">
+                 <Tag className="h-6 w-6 text-accent" strokeWidth={2.5} />
+-                Tag<span className="text-accent">IT</span>
++                Info<span className="text-accent">Tag</span>
+             </Link>
+             <div className="relative max-w-md space-y-4">
+                 <p className="font-display text-3xl font-bold tracking-tight leading-tight">
+diff --git a/frontend/src/index.css b/frontend/src/index.css
+index 3b100f7..8abd4cf 100644
+--- a/frontend/src/index.css
++++ b/frontend/src/index.css
+@@ -1,4 +1,4 @@
+-/* TagIT global styles
++/* InfoTag global styles
+    - Tailwind base layered + design tokens for light/dark theme
+    - Custom utilities reserved for the public Finder page and Medical mode
+ */
+diff --git a/frontend/src/lib/i18n.jsx b/frontend/src/lib/i18n.jsx
+index 62c8338..4d740c0 100644
+--- a/frontend/src/lib/i18n.jsx
++++ b/frontend/src/lib/i18n.jsx
+@@ -50,8 +50,8 @@ const dict = {
+             unclaimed_title: "This tag isn't claimed yet",
+             unclaimed_body: "If this tag belongs to you, sign in to claim it.",
+             tag_not_found: "We couldn't find this tag.",
+-            tag_not_found_help: "The QR may have been misprinted, or this code isn't a TagIT.",
+-            powered_by: "Powered by TagIT — privacy-first, no app needed.",
++            tag_not_found_help: "The QR may have been misprinted, or this code isn't a InfoTag.",
++            powered_by: "Powered by InfoTag — privacy-first, no app needed.",
+         },
+         emergency: {
+             heading: "MEDICAL EMERGENCY ID",
+@@ -68,7 +68,7 @@ const dict = {
+             hero_kicker: "A free public-service smart tag for every Indian household",
+             hero_title: "Lose less. Help more.",
+             hero_subtitle:
+-                "Stick a TagIT on your bike, your pet's collar, your luggage, your keys. If they ever get lost, a kind person can help — without installing an app.",
++                "Stick a InfoTag on your bike, your pet's collar, your luggage, your keys. If they ever get lost, a kind person can help — without installing an app.",
+             cta_primary: "Get your free tags",
+             cta_secondary: "See how it works",
+             feature_no_app: "No app for finders",
+@@ -96,7 +96,7 @@ const dict = {
+         auth: {
+             sign_in_title: "Welcome back",
+             sign_in_subtitle: "Sign in to manage your tags and emergency profile.",
+-            sign_up_title: "Create your TagIT account",
++            sign_up_title: "Create your InfoTag account",
+             sign_up_subtitle: "It's free. No card. No app. No spam.",
+             email: "Email",
+             password: "Password",
+@@ -270,8 +270,8 @@ const dict = {
+             unclaimed_title: "यह टैग अभी क्लेम नहीं किया गया है",
+             unclaimed_body: "अगर यह आपका है, तो साइन इन करके इसे क्लेम करें।",
+             tag_not_found: "यह टैग नहीं मिला।",
+-            tag_not_found_help: "QR ग़लत प्रिंट हुआ हो सकता है, या यह TagIT नहीं है।",
+-            powered_by: "TagIT — गोपनीयता-प्रथम, कोई ऐप नहीं।",
++            tag_not_found_help: "QR ग़लत प्रिंट हुआ हो सकता है, या यह InfoTag नहीं है।",
++            powered_by: "InfoTag — गोपनीयता-प्रथम, कोई ऐप नहीं।",
+         },
+         emergency: {
+             heading: "मेडिकल इमरजेंसी आईडी",
+@@ -288,7 +288,7 @@ const dict = {
+             hero_kicker: "हर भारतीय परिवार के लिए मुफ़्त जन-सेवा स्मार्ट टैग",
+             hero_title: "कम खोएँ। अधिक मदद करें।",
+             hero_subtitle:
+-                "अपनी बाइक, पालतू जानवर, सामान या चाबियों पर एक TagIT लगाएँ। यदि कभी खो जाएँ, तो कोई भी बिना ऐप के स्कैन कर मदद कर सकता है।",
++                "अपनी बाइक, पालतू जानवर, सामान या चाबियों पर एक InfoTag लगाएँ। यदि कभी खो जाएँ, तो कोई भी बिना ऐप के स्कैन कर मदद कर सकता है।",
+             cta_primary: "मुफ़्त टैग पाएँ",
+             cta_secondary: "कैसे काम करता है",
+             feature_no_app: "खोजने वाले के लिए कोई ऐप नहीं",
+@@ -315,7 +315,7 @@ const dict = {
+         auth: {
+             sign_in_title: "वापस स्वागत है",
+             sign_in_subtitle: "अपने टैग और इमरजेंसी प्रोफ़ाइल देखने के लिए साइन इन करें।",
+-            sign_up_title: "TagIT खाता बनाएँ",
++            sign_up_title: "InfoTag खाता बनाएँ",
+             sign_up_subtitle: "मुफ़्त। कोई कार्ड नहीं, कोई ऐप नहीं, कोई स्पैम नहीं।",
+             email: "ईमेल",
+             password: "पासवर्ड",
+@@ -469,12 +469,12 @@ function get(obj, dotted) {
+ const I18nContext = createContext(null);
+ 
+ export function I18nProvider({ children }) {
+-    const stored = typeof window !== "undefined" ? localStorage.getItem("tagit_lang") : null;
++    const stored = typeof window !== "undefined" ? localStorage.getItem("infotag_lang") : null;
+     const [lang, setLang] = useState(stored || "en");
+ 
+     useEffect(() => {
+         try {
+-            localStorage.setItem("tagit_lang", lang);
++            localStorage.setItem("infotag_lang", lang);
+             document.documentElement.lang = lang;
+         } catch (err) {
+             // localStorage may be unavailable (Safari private mode, SSR). Locale still
+diff --git a/frontend/src/lib/theme.jsx b/frontend/src/lib/theme.jsx
+index b371913..a487c34 100644
+--- a/frontend/src/lib/theme.jsx
++++ b/frontend/src/lib/theme.jsx
+@@ -6,7 +6,7 @@ const ThemeContext = createContext(null);
+ export function ThemeProvider({ children }) {
+     const [theme, setTheme] = useState(() => {
+         if (typeof window === "undefined") return "light";
+-        const stored = localStorage.getItem("tagit_theme");
++        const stored = localStorage.getItem("infotag_theme");
+         if (stored) return stored;
+         return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+             ? "dark"
+@@ -18,7 +18,7 @@ export function ThemeProvider({ children }) {
+         if (theme === "dark") root.classList.add("dark");
+         else root.classList.remove("dark");
+         try {
+-            localStorage.setItem("tagit_theme", theme);
++            localStorage.setItem("infotag_theme", theme);
+         } catch (err) {
+             // localStorage may be unavailable (Safari private mode, SSR). Theme still
+             // works in-memory — just won't survive a reload.
+diff --git a/frontend/src/pages/Auth.jsx b/frontend/src/pages/Auth.jsx
+index 0963741..df41a13 100644
+--- a/frontend/src/pages/Auth.jsx
++++ b/frontend/src/pages/Auth.jsx
+@@ -60,7 +60,7 @@ export default function AuthPage({ mode = "login" }) {
+             <div className="flex flex-col">
+                 <div className="flex items-center justify-between p-4 border-b md:border-0">
+                     <Link to="/" className="md:hidden inline-flex items-center gap-2 font-display font-black text-lg">
+-                        <Tag className="h-5 w-5 text-accent" /> Tag<span className="text-accent">IT</span>
++                        <Tag className="h-5 w-5 text-accent" /> Info<span className="text-accent">Tag</span>
+                     </Link>
+                     <div className="ml-auto flex items-center gap-1">
+                         <LanguageSwitcher compact />
+diff --git a/frontend/src/pages/Landing.jsx b/frontend/src/pages/Landing.jsx
+index fc2bc8e..534d153 100644
+--- a/frontend/src/pages/Landing.jsx
++++ b/frontend/src/pages/Landing.jsx
+@@ -40,7 +40,7 @@ export default function LandingPage() {
+                 <div className="mx-auto max-w-6xl px-4 sm:px-8 h-16 flex items-center justify-between">
+                     <Link to="/" className="flex items-center gap-2 font-display font-black text-xl tracking-tight" data-testid="landing-brand">
+                         <Tag className="h-5 w-5 text-accent" strokeWidth={2.5} />
+-                        <span>Tag<span className="text-accent">IT</span></span>
++                        <span>Info<span className="text-accent">Tag</span></span>
+                     </Link>
+                     <div className="flex items-center gap-1">
+                         <LanguageSwitcher compact />
+@@ -174,7 +174,7 @@ export default function LandingPage() {
+             <footer className="border-t mt-10">
+                 <div className="mx-auto max-w-6xl px-4 sm:px-8 py-10 grid sm:grid-cols-2 gap-6 text-sm">
+                     <div>
+-                        <div className="font-display font-black text-lg">Tag<span className="text-accent">IT</span></div>
++                        <div className="font-display font-black text-lg">Info<span className="text-accent">Tag</span></div>
+                         <p className="text-muted-foreground mt-2 max-w-md">{t("common.tagline")}</p>
+                         <p className="text-xs mt-3 text-muted-foreground">
+                             Founder · Anand Lakhera · an.31and@gmail.com · +91 89042 23100
+diff --git a/frontend/src/pages/Legal.jsx b/frontend/src/pages/Legal.jsx
+index d1e505d..a1e6ec7 100644
+--- a/frontend/src/pages/Legal.jsx
++++ b/frontend/src/pages/Legal.jsx
+@@ -7,7 +7,7 @@ function LegalLayout({ title, children }) {
+             <header className="border-b">
+                 <div className="mx-auto max-w-3xl px-4 sm:px-8 h-14 flex items-center justify-between">
+                     <Link to="/" className="font-display font-black inline-flex items-center gap-2" data-testid="legal-brand">
+-                        <Tag className="h-4 w-4 text-accent" /> Tag<span className="text-accent">IT</span>
++                        <Tag className="h-4 w-4 text-accent" /> Info<span className="text-accent">Tag</span>
+                     </Link>
+                     <Link to="/" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+                         <ArrowLeft className="h-4 w-4" /> Home
+@@ -26,7 +26,7 @@ export function PrivacyPage() {
+     return (
+         <LegalLayout title="Privacy policy">
+             <p>
+-                TagIT is a privacy-first, free public-service smart-tag ecosystem from India. We collect the
++                InfoTag is a privacy-first, free public-service smart-tag ecosystem from India. We collect the
+                 minimum data needed to help reunite items with owners and to surface medical emergency
+                 information when explicitly consented to.
+             </p>
+@@ -55,9 +55,9 @@ export function TermsPage() {
+     return (
+         <LegalLayout title="Terms of service">
+             <p>
+-                TagIT is provided free of cost as a public service. It is offered "as is" with no warranty of any
++                InfoTag is provided free of cost as a public service. It is offered "as is" with no warranty of any
+                 kind. We do our best to keep the service available and secure, but we are not liable for losses
+-                arising from the use, misuse or unavailability of TagIT.
++                arising from the use, misuse or unavailability of InfoTag.
+             </p>
+             <ul>
+                 <li>You must own the items you tag.</li>
+@@ -76,12 +76,12 @@ export function MedicalDisclaimerPage() {
+                 Wrong medical information is dangerous. Please double-check every field before saving.
+             </p>
+             <p>
+-                The Medical Emergency Mode on TagIT shows the information you, the owner, have entered and given
++                The Medical Emergency Mode on InfoTag shows the information you, the owner, have entered and given
+                 consent to display. It is intended as a convenience for first responders and bystanders — it is
+                 not a verified medical record. Always verify identity and seek qualified care.
+             </p>
+             <p>
+-                TagIT does not provide medical advice, diagnosis or treatment. We are not responsible for actions
++                InfoTag does not provide medical advice, diagnosis or treatment. We are not responsible for actions
+                 taken based on the information displayed.
+             </p>
+         </LegalLayout>
+diff --git a/frontend/src/pages/Settings.jsx b/frontend/src/pages/Settings.jsx
+index e70057e..d1e06e1 100644
+--- a/frontend/src/pages/Settings.jsx
++++ b/frontend/src/pages/Settings.jsx
+@@ -43,7 +43,7 @@ export default function SettingsPage() {
+             const url = URL.createObjectURL(blob);
+             const a = document.createElement("a");
+             a.href = url;
+-            a.download = "tagit-export.json";
++            a.download = "infotag-export.json";
+             a.click();
+             URL.revokeObjectURL(url);
+         } catch (e) {
+diff --git a/frontend/src/pages/TagQR.jsx b/frontend/src/pages/TagQR.jsx
+index f8e6709..d239020 100644
+--- a/frontend/src/pages/TagQR.jsx
++++ b/frontend/src/pages/TagQR.jsx
+@@ -105,26 +105,26 @@ export default function TagQRPage() {
+                         <div className="mt-5 space-y-3">
+                             <DownloadButton
+                                 url={`${qrSrc}?download=1`}
+-                                filename={`tagit-${tag.slug}-qr.png`}
++                                filename={`infotag-${tag.slug}-qr.png`}
+                                 label={t("qr.download_png")}
+                                 testId="dl-png"
+                                 icon={QrCode}
+                             />
+                             <DownloadButton
+                                 url={`${API_BASE}/tags/${tag.id}/pdf?layout=a4_stickers`}
+-                                filename={`tagit-${tag.slug}-a4_stickers.pdf`}
++                                filename={`infotag-${tag.slug}-a4_stickers.pdf`}
+                                 label={t("qr.download_a4")}
+                                 testId="dl-a4"
+                             />
+                             <DownloadButton
+                                 url={`${API_BASE}/tags/${tag.id}/pdf?layout=id_card`}
+-                                filename={`tagit-${tag.slug}-id_card.pdf`}
++                                filename={`infotag-${tag.slug}-id_card.pdf`}
+                                 label={t("qr.download_id")}
+                                 testId="dl-id"
+                             />
+                             <DownloadButton
+                                 url={`${API_BASE}/tags/${tag.id}/pdf?layout=keyring`}
+-                                filename={`tagit-${tag.slug}-keyring.pdf`}
++                                filename={`infotag-${tag.slug}-keyring.pdf`}
+                                 label={t("qr.download_keyring")}
+                                 testId="dl-keyring"
+                             />
+diff --git a/memory/PRD.md b/memory/PRD.md
+index 7f4e705..defbf90 100644
+--- a/memory/PRD.md
++++ b/memory/PRD.md
+@@ -1,7 +1,7 @@
+-# TagIT — Product Requirements Document
++# InfoTag — Product Requirements Document
+ 
+ ## Original problem statement
+-TagIT is a privacy-first, no-app (for finders), mobile-first, lightweight,
++InfoTag is a privacy-first, no-app (for finders), mobile-first, lightweight,
+ Made-in-India, free public-service smart-tag ecosystem.  Mission: help ordinary
+ people recover lost items (vehicles, pets, luggage, keys) and let first
+ responders read critical medical info in seconds — free of cost.
+-- 
+2.43.0
+
+
+From f0bee5df739c2feb4841257518083c0f052825ae Mon Sep 17 00:00:00 2001
+From: InfoTag rename <dev@example.com>
+Date: Wed, 1 Jul 2026 06:45:03 +0000
+Subject: [PATCH 2/2] docs: add DEPLOYMENT.md runbook and backend/.env.example
+
+---
+ DEPLOYMENT.md | 251 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 251 insertions(+)
+ create mode 100644 DEPLOYMENT.md
+
+diff --git a/DEPLOYMENT.md b/DEPLOYMENT.md
+new file mode 100644
+index 0000000..d9f9def
+--- /dev/null
++++ b/DEPLOYMENT.md
+@@ -0,0 +1,251 @@
++# InfoTag — Deployment Guide
++
++A practical runbook for taking InfoTag (FastAPI + MongoDB + React PWA) from a clone to a live, production URL. Written for a solo developer / small team going live for the first time.
++
++---
++
++## 1. Architecture at a glance
++
++InfoTag is three moving parts:
++
++| Component | Tech | Port | Role |
++|-----------|------|------|------|
++| **Backend** | FastAPI (uvicorn) | `8001` | REST API under `/api/*`, plus server-side-rendered finder pages |
++| **Frontend** | React PWA served by nginx | `3000` | Owner-facing app + PWA shell |
++| **Database** | MongoDB 7 | `27017` | All persistent data |
++
++Two things worth understanding before you deploy:
++
++1. **Frontend and backend are separate origins.** nginx serves the SPA and does **not** proxy `/api` — the browser calls the backend directly using the `REACT_APP_BACKEND_URL` baked in at build time. This means **CORS must be configured** (`CORS_ORIGINS`) and `REACT_APP_BACKEND_URL` must point at your public API URL.
++2. **The finder pages are server-rendered by the backend** (`/api/finder/{slug}`). When someone scans a QR sticker, they hit the backend directly, not the React app. So the backend must be publicly reachable on its own domain/subdomain.
++
++---
++
++## 2. Prerequisites
++
++- A GitHub account with the repo (`an31and/InfoTag` after you rename it — see §9).
++- A domain you control (see the domain note in §7).
++- One of the two hosting paths below:
++  - **Path A — Single VPS + Docker** (cheapest, most control).
++  - **Path B — Managed (Railway + MongoDB Atlas + Cloudflare)** (fastest to live, less ops).
++- Email sending credentials (SendGrid API key *or* SMTP).
++- *(Optional, for WhatsApp alerts)* Meta Cloud API key and/or Twilio credentials.
++
++---
++
++## 3. Environment variables
++
++The repo's `docker-compose.yml` references `backend/.env.example`, **but that file does not exist yet** — create it. Below is a complete, ready-to-use template. Copy it to `backend/.env` and fill in real values.
++
++```dotenv
++# ---- Core (required) ----
++MONGO_URL=mongodb://mongo:27017          # Atlas: mongodb+srv://user:pass@cluster.../
++DB_NAME=infotag
++JWT_SECRET=CHANGE_ME_TO_A_LONG_RANDOM_STRING   # see warning below
++SITE_URL=https://infotag.example.com     # public URL of the SSR/backend
++FRONTEND_URL=https://app.infotag.example.com
++CORS_ORIGINS=https://app.infotag.example.com
++
++# ---- Seed admin (created on first boot) ----
++ADMIN_EMAIL=you@yourdomain.com
++ADMIN_PASSWORD=CHANGE_ME_STRONG_PASSWORD
++
++# ---- Email (choose ONE) ----
++EMAIL_FROM=no-reply@yourdomain.com
++# Option 1: SendGrid
++SENDGRID_API_KEY=
++# Option 2: SMTP
++SMTP_HOST=
++SMTP_PORT=587
++SMTP_USER=
++SMTP_PASS=
++
++# ---- WhatsApp / SMS (optional) ----
++WHATSAPP_API_KEY=
++TWILIO_ACCOUNT_SID=
++TWILIO_AUTH_TOKEN=
++```
++
++> ⚠️ **Security-critical — `JWT_SECRET`.** The code falls back to a hardcoded default if this is unset. Session-token integrity depends entirely on this value. Generate a strong secret and set it in every environment:
++> ```bash
++> python3 -c "import secrets; print(secrets.token_urlsafe(48))"
++> ```
++> Never commit `.env`. Confirm `.env` is in `.gitignore`.
++
++**Frontend build variable** (set at build time, not runtime):
++
++```
++REACT_APP_BACKEND_URL=https://infotag.example.com   # public API base
++```
++
++---
++
++## 4. Path A — Self-host with Docker Compose (single VPS)
++
++Best for: a $5–10/mo VPS (Hetzner, DigitalOcean, Linode) where you want everything in one place.
++
++**Step 1 — Provision & install Docker**
++```bash
++# On a fresh Ubuntu 22.04+ box
++curl -fsSL https://get.docker.com | sh
++```
++
++**Step 2 — Clone & configure**
++```bash
++git clone https://github.com/an31and/InfoTag.git
++cd InfoTag
++cp backend/.env.example backend/.env
++nano backend/.env          # fill in real values from §3
++```
++
++**Step 3 — Point the frontend at the public API.** Edit `docker-compose.yml` so the frontend build arg and CORS use real URLs instead of `localhost`:
++```yaml
++  frontend:
++    build:
++      context: ./frontend
++      args:
++        REACT_APP_BACKEND_URL: "https://infotag.example.com"
++```
++And set `CORS_ORIGINS` in the backend service (or `.env`) to your frontend URL.
++
++**Step 4 — Launch**
++```bash
++docker compose up --build -d
++docker compose logs -f backend      # watch for "InfoTag API ready"
++```
++
++**Step 5 — Put it behind HTTPS.** Don't expose ports 3000/8001 raw. Run a reverse proxy (Caddy is the least-effort option — automatic TLS):
++
++```
++# Caddyfile
++app.infotag.example.com {
++    reverse_proxy localhost:3000
++}
++infotag.example.com {
++    reverse_proxy localhost:8001
++}
++```
++```bash
++docker run -d --network host \
++  -v $PWD/Caddyfile:/etc/caddy/Caddyfile \
++  -v caddy_data:/data caddy
++```
++
++> 🔒 **Harden before going live:** In production, **do not publish MongoDB's port** (`27017`) to the host. Remove the `ports:` block from the `mongo` service so it's only reachable on the internal Docker network. The current `docker-compose.yml` exposes it for local dev convenience.
++
++---
++
++## 5. Path B — Managed cloud (Railway + Atlas + Cloudflare)
++
++Best for: fastest route to live, minimal server maintenance. Matches the recommended stack.
++
++**Step 1 — Database: MongoDB Atlas**
++1. Create a free **M0** cluster.
++2. Add a database user and note the connection string (`mongodb+srv://...`).
++3. Under *Network Access*, allow your Railway egress IPs (or `0.0.0.0/0` temporarily, then tighten).
++4. This becomes your `MONGO_URL`; set `DB_NAME=infotag`.
++
++**Step 2 — Backend on Railway**
++1. *New Project → Deploy from GitHub repo → InfoTag*, root set to `/backend`.
++2. Railway auto-detects the Dockerfile (`EXPOSE 8001`, uvicorn CMD).
++3. Add all backend env vars from §3.
++4. Deploy; note the generated public URL → this is your `SITE_URL` and the frontend's `REACT_APP_BACKEND_URL`.
++
++**Step 3 — Frontend on Railway (or Cloudflare Pages / Netlify)**
++1. New service, root `/frontend`.
++2. Set build arg `REACT_APP_BACKEND_URL` to the backend URL from Step 2.
++3. Deploy. Note its URL → set `FRONTEND_URL` and `CORS_ORIGINS` on the backend and redeploy the backend.
++
++**Step 4 — Cloudflare for DNS + SSL**
++1. Add your domain to Cloudflare, update nameservers at your registrar.
++2. Create records:
++   - `infotag.example.com` → backend (proxied, orange cloud)
++   - `app.infotag.example.com` → frontend (proxied)
++3. SSL/TLS mode: **Full (strict)**.
++
++---
++
++## 6. Post-deploy verification (smoke test)
++
++```bash
++# 1. API is up
++curl https://infotag.example.com/api/health          # expect {"status":"ok"} style 200
++
++# 2. Public identity
++curl https://infotag.example.com/api                  # {"name":"InfoTag API", ...}
++
++# 3. Finder SSR renders (use a real seeded slug)
++curl https://infotag.example.com/api/finder/<slug> | grep -i infotag
++
++# 4. Frontend loads and PWA manifest is served
++curl https://app.infotag.example.com/manifest.json    # "short_name":"InfoTag"
++
++# 5. Admin login works (seeded from ADMIN_EMAIL/ADMIN_PASSWORD on first boot)
++```
++
++Then run the backend test suite against a staging target before trusting production:
++```bash
++cd backend && pip install -r requirements.txt && pytest tests/
++```
++
++---
++
++## 7. Domain decision — read this before printing anything
++
++The rename changed the **brand** to InfoTag, but the codebase still contains the **domain `tagit.in`** in several places that were intentionally left untouched, because a brand name and a registered domain are separate things:
++
++- Default sender addresses (`no-reply@tagit.in`, `admin@tagit.in`)
++- Seed/test admin emails (`anand@tagit.in`)
++- **Printed on QR stickers**: the PDF generators print `"InfoTag · tagit.in"` and `"or visit tagit.in/api/finder/{slug}"`
++
++You need to make a conscious choice:
++
++1. **Keep `tagit.in`** as the operational domain — then the printed stickers will read `InfoTag · tagit.in` (brand and domain differ, which is common and fine).
++2. **Move to a new domain** (e.g. `infotag.in`) — then register it, and update the domain string in `backend/routes/pdf_routes.py` (two `tagit.in/api/finder` strings + two footer strings) and `backend/notifications.py` / `backend/db.py` sender defaults.
++
++Whatever you choose, the QR URL your stickers point to must match the domain where the **backend** is reachable, because scanning hits `/{domain}/api/finder/{slug}` directly.
++
++---
++
++## 8. Production hardening checklist
++
++Before real users and real stickers:
++
++- [ ] `JWT_SECRET` set to a strong random value in every environment.
++- [ ] `ADMIN_PASSWORD` changed from any default; login verified.
++- [ ] MongoDB **not** publicly exposed (no host `ports:` on the mongo service; Atlas network access restricted).
++- [ ] `CORS_ORIGINS` set to your exact frontend origin(s) — not `*`.
++- [ ] HTTPS everywhere; Cloudflare SSL mode Full (strict) or Caddy auto-TLS.
++- [ ] Rate limiting on the public finder/owner-exposing endpoints. *(This was implemented earlier as `ratelimit.py` but is not committed in the current repo — re-add it before launch, since finder pages expose sensitive data like blood group, allergies, and emergency contacts.)*
++- [ ] MongoDB indexes on hot collections (tag `slug`, user `email`). *(Flagged previously as a technical risk; add these to avoid full-collection scans under load.)*
++- [ ] `.env` git-ignored and never committed.
++- [ ] A backup strategy for MongoDB (Atlas has automated backups on paid tiers; for self-host, schedule `mongodump`).
++- [ ] Basic uptime monitoring hitting `/api/health`.
++
++---
++
++## 9. Finishing the rename (manual steps I could not do for you)
++
++The code rename is complete, but two things live outside the codebase:
++
++1. **Rename the GitHub repo.** On GitHub: *Settings → Repository name → `InfoTag`*. Git redirects the old URL, but update any CI, deploy hooks, and your local remote:
++   ```bash
++   git remote set-url origin https://github.com/an31and/InfoTag.git
++   ```
++2. **The domain** — see §7.
++
++Also note: the rename changed a few **identifiers**, not just display text:
++- `DB_NAME` default is now `infotag` (was `tagit`). If you already have data in a `tagit` database, either keep `DB_NAME=tagit` or migrate: `mongodump --db tagit` then `mongorestore --db infotag`.
++- localStorage keys (`infotag_lang`, `infotag_theme`) and the service-worker cache (`infotag-shell-v1`) changed. Pre-launch this is harmless; existing browsers would just re-pick defaults once.
++
++---
++
++## 10. Rollback
++
++- **Docker (Path A):** `docker compose down` then redeploy the previous image tag / git commit.
++- **Railway (Path B):** every deploy is a versioned snapshot — use *Deployments → Rollback*.
++- **Database:** restore from the most recent `mongodump` / Atlas backup. Keep a fresh dump immediately before any launch-day change.
++
++---
++
++*Generated as part of the InfoTag rebrand. Adjust example domains/URLs to your own before use.*
+-- 
+2.43.0
+

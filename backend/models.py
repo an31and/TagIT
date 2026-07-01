@@ -1,4 +1,4 @@
-"""Pydantic models for TagIT.
+"""Pydantic models for InfoTag.
 
 We keep MongoDB documents flat and JSON-serialisable.  All ObjectIds are
 avoided in favour of UUID strings stored in the document body so the API

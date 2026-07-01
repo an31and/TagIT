@@ -15,7 +15,7 @@ import requests
 
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com").rstrip("/")
 ADMIN_EMAIL = "anand@tagit.in"
-ADMIN_PASSWORD = "TagITAdmin@2026"
+ADMIN_PASSWORD = "InfoTagAdmin@2026"
 
 
 @pytest.fixture(scope="module")
@@ -48,7 +48,7 @@ class TestSSRVehicle:
         assert "text/html" in ct, f"content-type={ct}"
         html = r.text
         # brand
-        assert "TagIT" in html or "Tag<span" in html
+        assert "InfoTag" in html or "Info<span" in html
         assert 'data-testid="finder-brand"' in html
         # quick action buttons
         assert 'data-testid="finder-action-wrong_parking"' in html

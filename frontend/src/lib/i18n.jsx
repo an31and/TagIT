@@ -50,8 +50,8 @@ const dict = {
             unclaimed_title: "This tag isn't claimed yet",
             unclaimed_body: "If this tag belongs to you, sign in to claim it.",
             tag_not_found: "We couldn't find this tag.",
-            tag_not_found_help: "The QR may have been misprinted, or this code isn't a TagIT.",
-            powered_by: "Powered by TagIT — privacy-first, no app needed.",
+            tag_not_found_help: "The QR may have been misprinted, or this code isn't a InfoTag.",
+            powered_by: "Powered by InfoTag — privacy-first, no app needed.",
         },
         emergency: {
             heading: "MEDICAL EMERGENCY ID",
@@ -68,7 +68,7 @@ const dict = {
             hero_kicker: "A free public-service smart tag for every Indian household",
             hero_title: "Lose less. Help more.",
             hero_subtitle:
-                "Stick a TagIT on your bike, your pet's collar, your luggage, your keys. If they ever get lost, a kind person can help — without installing an app.",
+                "Stick a InfoTag on your bike, your pet's collar, your luggage, your keys. If they ever get lost, a kind person can help — without installing an app.",
             cta_primary: "Get your free tags",
             cta_secondary: "See how it works",
             feature_no_app: "No app for finders",
@@ -96,7 +96,7 @@ const dict = {
         auth: {
             sign_in_title: "Welcome back",
             sign_in_subtitle: "Sign in to manage your tags and emergency profile.",
-            sign_up_title: "Create your TagIT account",
+            sign_up_title: "Create your InfoTag account",
             sign_up_subtitle: "It's free. No card. No app. No spam.",
             email: "Email",
             password: "Password",
@@ -270,8 +270,8 @@ const dict = {
             unclaimed_title: "यह टैग अभी क्लेम नहीं किया गया है",
             unclaimed_body: "अगर यह आपका है, तो साइन इन करके इसे क्लेम करें।",
             tag_not_found: "यह टैग नहीं मिला।",
-            tag_not_found_help: "QR ग़लत प्रिंट हुआ हो सकता है, या यह TagIT नहीं है।",
-            powered_by: "TagIT — गोपनीयता-प्रथम, कोई ऐप नहीं।",
+            tag_not_found_help: "QR ग़लत प्रिंट हुआ हो सकता है, या यह InfoTag नहीं है।",
+            powered_by: "InfoTag — गोपनीयता-प्रथम, कोई ऐप नहीं।",
         },
         emergency: {
             heading: "मेडिकल इमरजेंसी आईडी",
@@ -288,7 +288,7 @@ const dict = {
             hero_kicker: "हर भारतीय परिवार के लिए मुफ़्त जन-सेवा स्मार्ट टैग",
             hero_title: "कम खोएँ। अधिक मदद करें।",
             hero_subtitle:
-                "अपनी बाइक, पालतू जानवर, सामान या चाबियों पर एक TagIT लगाएँ। यदि कभी खो जाएँ, तो कोई भी बिना ऐप के स्कैन कर मदद कर सकता है।",
+                "अपनी बाइक, पालतू जानवर, सामान या चाबियों पर एक InfoTag लगाएँ। यदि कभी खो जाएँ, तो कोई भी बिना ऐप के स्कैन कर मदद कर सकता है।",
             cta_primary: "मुफ़्त टैग पाएँ",
             cta_secondary: "कैसे काम करता है",
             feature_no_app: "खोजने वाले के लिए कोई ऐप नहीं",
@@ -315,7 +315,7 @@ const dict = {
         auth: {
             sign_in_title: "वापस स्वागत है",
             sign_in_subtitle: "अपने टैग और इमरजेंसी प्रोफ़ाइल देखने के लिए साइन इन करें।",
-            sign_up_title: "TagIT खाता बनाएँ",
+            sign_up_title: "InfoTag खाता बनाएँ",
             sign_up_subtitle: "मुफ़्त। कोई कार्ड नहीं, कोई ऐप नहीं, कोई स्पैम नहीं।",
             email: "ईमेल",
             password: "पासवर्ड",
@@ -469,12 +469,12 @@ function get(obj, dotted) {
 const I18nContext = createContext(null);
 
 export function I18nProvider({ children }) {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("tagit_lang") : null;
+    const stored = typeof window !== "undefined" ? localStorage.getItem("infotag_lang") : null;
     const [lang, setLang] = useState(stored || "en");
 
     useEffect(() => {
         try {
-            localStorage.setItem("tagit_lang", lang);
+            localStorage.setItem("infotag_lang", lang);
             document.documentElement.lang = lang;
         } catch (err) {
             // localStorage may be unavailable (Safari private mode, SSR). Locale still

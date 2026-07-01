@@ -6,7 +6,7 @@ const ThemeContext = createContext(null);
 export function ThemeProvider({ children }) {
     const [theme, setTheme] = useState(() => {
         if (typeof window === "undefined") return "light";
-        const stored = localStorage.getItem("tagit_theme");
+        const stored = localStorage.getItem("infotag_theme");
         if (stored) return stored;
         return window.matchMedia?.("(prefers-color-scheme: dark)").matches
             ? "dark"
@@ -18,7 +18,7 @@ export function ThemeProvider({ children }) {
         if (theme === "dark") root.classList.add("dark");
         else root.classList.remove("dark");
         try {
-            localStorage.setItem("tagit_theme", theme);
+            localStorage.setItem("infotag_theme", theme);
         } catch (err) {
             // localStorage may be unavailable (Safari private mode, SSR). Theme still
             // works in-memory — just won't survive a reload.

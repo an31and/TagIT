@@ -1,4 +1,4 @@
-# TagIT Auth Testing Playbook
+# InfoTag Auth Testing Playbook
 
 Two auth paths converge on the same JWT cookie session:
 
@@ -20,7 +20,7 @@ Expect bcrypt hash starting with `$2b$` for the seeded admin.
 API=$(grep REACT_APP_BACKEND_URL /app/frontend/.env | cut -d= -f2)
 curl -c /tmp/c.txt -X POST "$API/api/auth/login" \
   -H "Content-Type: application/json" \
-  -d '{"email":"anand@tagit.in","password":"TagITAdmin@2026"}'
+  -d '{"email":"anand@tagit.in","password":"InfoTagAdmin@2026"}'
 curl -b /tmp/c.txt "$API/api/auth/me"
 curl -b /tmp/c.txt "$API/api/tags"           # should list demo tags
 ```

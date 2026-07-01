@@ -71,7 +71,7 @@ async def generate_pdf(
     url = f"{_site_url()}/api/finder/{doc['slug']}"
     pil = _qr_image(url)
     caption = CONTEXT_CAPTIONS.get(doc.get("type", "general"), "Scan if found")
-    label = doc.get("display_name") or doc.get("label") or "TagIT"
+    label = doc.get("display_name") or doc.get("label") or "InfoTag"
 
     buf = io.BytesIO()
     if layout == "a4_stickers":
@@ -83,7 +83,7 @@ async def generate_pdf(
     else:
         raise HTTPException(status_code=400, detail="Unknown layout")
     buf.seek(0)
-    filename = f"tagit-{doc['slug']}-{layout}.pdf"
+    filename = f"infotag-{doc['slug']}-{layout}.pdf"
     return StreamingResponse(
         buf,
         media_type="application/pdf",
@@ -127,7 +127,7 @@ def _draw_a4_stickers(buf, pil, slug, label, caption, tag_type) -> None:
             # Header
             c.setFillColor(EMERGENCY_RED if tag_type == "medical" else ASHOKA_NAVY)
             c.setFont("Helvetica-Bold", 9)
-            c.drawCentredString(x + cell_w / 2, y + cell_h - 8 * mm, "TagIT · tagit.in")
+            c.drawCentredString(x + cell_w / 2, y + cell_h - 8 * mm, "InfoTag · tagit.in")
             # Caption
             c.setFillColor(black)
             c.setFont("Helvetica-Bold", 8)
@@ -164,7 +164,7 @@ def _draw_id_card(buf, pil, slug, label, caption, tag_type) -> None:
     c.saveState()
     c.translate(x + band_w / 2, y + card_h / 2)
     c.rotate(90)
-    c.drawCentredString(0, -3, "TagIT · MADE IN INDIA")
+    c.drawCentredString(0, -3, "InfoTag · MADE IN INDIA")
     c.restoreState()
 
     # QR
@@ -212,6 +212,6 @@ def _draw_keyring(buf, pil, slug, label, caption, tag_type) -> None:
             _draw_qr(c, pil, x + (size - qr_size) / 2, y + (size - qr_size) / 2 + 2 * mm, qr_size)
             c.setFillColor(EMERGENCY_RED if tag_type == "medical" else ASHOKA_NAVY)
             c.setFont("Helvetica-Bold", 6)
-            c.drawCentredString(x + size / 2, y + 3.5 * mm, "TagIT · tagit.in")
+            c.drawCentredString(x + size / 2, y + 3.5 * mm, "InfoTag · tagit.in")
     c.showPage()
     c.save()

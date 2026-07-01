@@ -1,7 +1,7 @@
-# TagIT — Product Requirements Document
+# InfoTag — Product Requirements Document
 
 ## Original problem statement
-TagIT is a privacy-first, no-app (for finders), mobile-first, lightweight,
+InfoTag is a privacy-first, no-app (for finders), mobile-first, lightweight,
 Made-in-India, free public-service smart-tag ecosystem.  Mission: help ordinary
 people recover lost items (vehicles, pets, luggage, keys) and let first
 responders read critical medical info in seconds — free of cost.

@@ -1,5 +1,5 @@
 """
-TagIT — Iteration-2 new-features tests.
+InfoTag — Iteration-2 new-features tests.
 
 Covers ONLY what changed in this iteration (per review request):
   - Async google session (httpx, non-blocking)
@@ -22,7 +22,7 @@ BASE_URL = os.environ.get(
 ).rstrip("/")
 
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "TagITAdmin@2026")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "InfoTagAdmin@2026")
 
 
 # ---------- Fixtures ----------

@@ -10,7 +10,7 @@ services:
     image: mongo:7
     restart: unless-stopped
     volumes:
-      - tagit_mongo:/data/db
+      - infotag_mongo:/data/db
     ports:
       - "27017:27017"
 
@@ -20,7 +20,7 @@ services:
     env_file: ./backend/.env
     environment:
       MONGO_URL: "mongodb://mongo:27017"
-      DB_NAME: "tagit"
+      DB_NAME: "infotag"
       CORS_ORIGINS: "http://localhost:3000"
     depends_on:
       - mongo
@@ -39,4 +39,4 @@ services:
       - "3000:3000"
 
 volumes:
-  tagit_mongo:
+  infotag_mongo:

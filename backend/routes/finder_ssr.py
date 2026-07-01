@@ -53,8 +53,8 @@ STRINGS: dict[str, dict[str, str]] = {
         "unclaimed_title": "This tag isn't claimed yet",
         "unclaimed_body": "If this tag belongs to you, sign in to claim it.",
         "tag_not_found": "We couldn't find this tag.",
-        "tag_not_found_help": "The QR may have been misprinted, or this code isn't a TagIT.",
-        "powered_by": "Powered by TagIT — privacy-first, no app needed.",
+        "tag_not_found_help": "The QR may have been misprinted, or this code isn't a InfoTag.",
+        "powered_by": "Powered by InfoTag — privacy-first, no app needed.",
         "made_in_india": "Made in India",
         "lang_switch": "हिन्दी",
         "back": "← Back",
@@ -87,7 +87,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "unclaimed_body": "अगर यह आपका है, तो साइन इन करके इसे क्लेम करें।",
         "tag_not_found": "यह टैग नहीं मिला।",
         "tag_not_found_help": "QR ग़लत प्रिंट हुआ हो सकता है।",
-        "powered_by": "TagIT — गोपनीयता-प्रथम, कोई ऐप नहीं।",
+        "powered_by": "InfoTag — गोपनीयता-प्रथम, कोई ऐप नहीं।",
         "made_in_india": "मेड इन इंडिया",
         "lang_switch": "English",
         "back": "← वापस",
@@ -174,7 +174,7 @@ body.em{background:#fef2f2}
 """
 
 
-def render_layout(*, lang: str, body: str, emergency: bool = False, title: str = "TagIT") -> str:
+def render_layout(*, lang: str, body: str, emergency: bool = False, title: str = "InfoTag") -> str:
     other_lang = "hi" if lang == "en" else "en"
     body_class = "em" if emergency else ""
     return f"""<!doctype html>
@@ -185,15 +185,15 @@ def render_layout(*, lang: str, body: str, emergency: bool = False, title: str =
 <meta name="theme-color" content="{'#dc2626' if emergency else '#0F172A'}">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex,nofollow">
-<title>{esc(title)} — TagIT</title>
-<meta name="description" content="A kind person scanned this TagIT. Help reunite an item with its owner.">
+<title>{esc(title)} — InfoTag</title>
+<meta name="description" content="A kind person scanned this InfoTag. Help reunite an item with its owner.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230F172A'/%3E%3Cpath d='M21 11l-4-4-9 9v4h4l9-9z' stroke='%23E25822' stroke-width='2.4' fill='none' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>{CSS}</style>
 <script>document.documentElement.className='js'</script>
 </head>
 <body class="{body_class}">
 <header><div class="wrap row">
-<a class="brand" href="/" data-testid="finder-brand"><span aria-hidden="true" class="icon-tag">⛓︎</span>Tag<span class="it">IT</span></a>
+<a class="brand" href="/" data-testid="finder-brand"><span aria-hidden="true" class="icon-tag">⛓︎</span>Info<span class="it">Tag</span></a>
 <a class="lang" href="?lang={other_lang}" data-testid="finder-lang-switch">{esc(STRINGS[lang]['lang_switch'])}</a>
 </div></header>
 <main class="wrap">{body}</main>
@@ -304,7 +304,7 @@ def render_claimed(lang: str, doc: dict) -> str:
     body = f"""
 <div class="card" data-testid="finder-claimed">
 <div class="kicker">{esc(doc.get('type','item').upper())}</div>
-<h1 data-testid="finder-display-name">{esc(display_name) or 'TagIT'}</h1>
+<h1 data-testid="finder-display-name">{esc(display_name) or 'InfoTag'}</h1>
 <div class="muted" style="margin-top:4px">{esc(t(lang,'header'))}</div>
 {lost_banner}
 {note_html}
@@ -330,7 +330,7 @@ navigator.geolocation.getCurrentPosition(function(p){{
 var v=p.coords.latitude+','+p.coords.longitude;
 document.querySelectorAll('[data-loc-target]').forEach(function(el){{el.value=v}});
 }},function(){{}},{{timeout:5000,enableHighAccuracy:false}});}})();</script>"""
-    return render_layout(lang=lang, body=body, title=display_name or "TagIT")
+    return render_layout(lang=lang, body=body, title=display_name or "InfoTag")
 
 
 def render_emergency(lang: str, doc: dict, em: dict) -> str:
@@ -528,6 +528,6 @@ async def finder_action(
         )
         if loc:
             text += f"Location: https://maps.google.com/?q={loc['lat']},{loc['lng']}\n"
-        send_email(owner["email"], f"[TagIT] {action_type.replace('_', ' ')} on your tag", text)
+        send_email(owner["email"], f"[InfoTag] {action_type.replace('_', ' ')} on your tag", text)
 
     return HTMLResponse(render_thanks(lang, slug))

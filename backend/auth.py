@@ -102,7 +102,7 @@ def clear_auth_cookies(response: Response) -> None:
 
 def hash_ip(ip: str) -> str:
     """Stable hash so we never store raw IPs but can still rate-limit."""
-    salt = os.environ.get("JWT_SECRET", "tagit")
+    salt = os.environ.get("JWT_SECRET", "infotag")
     return hashlib.sha256(f"{salt}:{ip}".encode("utf-8")).hexdigest()[:32]
 
 

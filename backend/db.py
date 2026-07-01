@@ -1,4 +1,4 @@
-"""MongoDB connection + index/seed setup for TagIT."""
+"""MongoDB connection + index/seed setup for InfoTag."""
 from __future__ import annotations
 
 import os

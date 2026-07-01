@@ -102,7 +102,7 @@ async def post_finder_message(
         )
         if msg.get("location"):
             link += f"Location: https://maps.google.com/?q={msg['location'].get('lat')},{msg['location'].get('lng')}\n"
-        send_email(owner["email"], f"[TagIT] {payload.action_type.replace('_', ' ')} on your tag", link)
+        send_email(owner["email"], f"[InfoTag] {payload.action_type.replace('_', ' ')} on your tag", link)
 
     return {
         "id": msg["id"],

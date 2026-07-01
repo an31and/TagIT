@@ -1,4 +1,4 @@
-"""TagIT — FastAPI entrypoint."""
+"""InfoTag — FastAPI entrypoint."""
 from __future__ import annotations
 
 from dotenv import load_dotenv
@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
     await ensure_indexes(db)
     await seed_admin_and_demo(db)
     logger.info(
-        "TagIT API ready. Email=%s WhatsApp=%s Twilio=%s",
+        "InfoTag API ready. Email=%s WhatsApp=%s Twilio=%s",
         email_enabled(), whatsapp_enabled(), twilio_enabled(),
     )
     yield
@@ -42,7 +42,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="TagIT",
+    title="InfoTag",
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -76,7 +76,7 @@ app.include_router(finder_ssr_router)
 
 @app.get("/api")
 async def root() -> dict:
-    return {"name": "TagIT API", "tagline": "Privacy-first, no-app, public-service smart tags.", "made_in": "India", "docs": "/docs"}
+    return {"name": "InfoTag API", "tagline": "Privacy-first, no-app, public-service smart tags.", "made_in": "India", "docs": "/docs"}
 
 
 @app.get("/api/health")

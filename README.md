@@ -1,8 +1,8 @@
-# TagIT — privacy-first, no-app smart tags
+# InfoTag — privacy-first, no-app smart tags
 
 > Lose less. Help more.  
 
-TagIT is a self-hostable web app + PWA that lets ordinary people stick a QR
+InfoTag is a self-hostable web app + PWA that lets ordinary people stick a QR
 sticker on their bike, pet's collar, luggage, keys or wallet — and lets a
 kind person reach the owner if it's ever lost, **without installing an app**.
 
@@ -12,7 +12,7 @@ group, allergies and an emergency contact in seconds.
 ## Why
 
 Most "smart tag" products lock finders into an app, expose owners' phone
-numbers, or charge a subscription. TagIT does none of those.
+numbers, or charge a subscription. InfoTag does none of those.
 
 - **No app for finders.** Any phone camera. Open web page. Done.
 - **PWA for owners.** Installable on Android/iOS via the web manifest.
@@ -58,7 +58,7 @@ Open `http://localhost:3000`. Sign in with the admin you set in `backend/.env`
 
 ```bash
 # 1. MongoDB
-mongod --dbpath /tmp/tagit-db &
+mongod --dbpath /tmp/infotag-db &
 
 # 2. Backend
 cd backend

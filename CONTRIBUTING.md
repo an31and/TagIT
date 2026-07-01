@@ -1,6 +1,6 @@
-# Contributing to TagIT
+# Contributing to InfoTag
 
-Thanks for wanting to help. TagIT is a free, public-service project — every
+Thanks for wanting to help. InfoTag is a free, public-service project — every
 small fix matters.
 
 ## Code of conduct
@@ -9,8 +9,8 @@ hold each other to the same standard.
 
 ## Getting set up
 ```bash
-git clone https://github.com/<you>/tagit
-cd tagit
+git clone https://github.com/<you>/infotag
+cd infotag
 cp backend/.env.example backend/.env
 docker compose up --build
 ```

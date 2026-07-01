@@ -1,6 +1,6 @@
-// TagIT — lightweight service worker.
+// InfoTag — lightweight service worker.
 // Caches the app shell only; never the API responses.
-const CACHE = "tagit-shell-v1";
+const CACHE = "infotag-shell-v1";
 const SHELL = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener("install", (event) => {

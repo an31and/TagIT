@@ -1,6 +1,6 @@
-# TagIT — backend (FastAPI)
+# InfoTag — backend (FastAPI)
 
-Async FastAPI service for the TagIT ecosystem.
+Async FastAPI service for the InfoTag ecosystem.
 
 ## Stack
 - FastAPI + Pydantic v2

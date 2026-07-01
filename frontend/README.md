@@ -1,4 +1,4 @@
-# TagIT — frontend (React PWA)
+# InfoTag — frontend (React PWA)
 
 React + Tailwind PWA. Installable on Android/iOS via the web manifest, but
 **finders never need to install anything** — they just open the QR URL.
