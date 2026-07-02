@@ -44,12 +44,25 @@ async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
         "last_attempt_at",
         expireAfterSeconds=60 * 60,  # auto-clean stale lockout entries after 1h
     )
+    # Visitor counting: one doc per (hashed IP, day) — idempotent upserts.
+    await db.visits.create_index([("ip_hash", 1), ("day", 1)], unique=True)
+    await db.visits.create_index("day")
+    # Feedback moderation queue
+    await db.feedback.create_index("created_at")
+    await db.feedback.create_index("is_public")
 
 
 async def seed_admin_and_demo(db: AsyncIOMotorDatabase) -> None:
     """Create an admin account + demo tags so the app is testable on boot."""
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@tagit.in")
     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
+    if admin_password == "admin123":
+        import logging
+
+        logging.getLogger(__name__).warning(
+            "SECURITY: ADMIN_PASSWORD is unset — using the default 'admin123'. "
+            "Set a strong ADMIN_PASSWORD in the environment before going live."
+        )
 
     admin = await db.users.find_one({"email": admin_email}, {"_id": 0})
     if admin is None:

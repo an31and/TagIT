@@ -2,8 +2,10 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile
+# yarn.lock* — the wildcard tolerates a missing lockfile (none is committed
+# yet). Once you commit a yarn.lock, builds become reproducible automatically.
+COPY package.json yarn.lock* ./
+RUN yarn install
 
 COPY . .
 ARG REACT_APP_BACKEND_URL=http://localhost:8001

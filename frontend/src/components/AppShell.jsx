@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Bell, LayoutGrid, LogOut, Settings as SettingsIcon, Tag } from "lucide-react";
+import { Bell, LayoutGrid, LogOut, Settings as SettingsIcon, ShieldCheck, Tag } from "lucide-react";
 
 import { Button } from "../components/ui/button";
 import { useAuth } from "../lib/auth";
@@ -39,6 +39,9 @@ export function AppShell() {
                         <NavTab to="/dashboard" icon={<LayoutGrid className="h-4 w-4" />} label={t("common.dashboard")} testId="nav-dashboard" />
                         <NavTab to="/inbox" icon={<Bell className="h-4 w-4" />} label={t("common.inbox")} testId="nav-inbox" />
                         <NavTab to="/settings" icon={<SettingsIcon className="h-4 w-4" />} label={t("common.settings")} testId="nav-settings" />
+                        {user?.role === "admin" && (
+                            <NavTab to="/admin" icon={<ShieldCheck className="h-4 w-4" />} label="Admin" testId="nav-admin" />
+                        )}
                     </nav>
                     <div className="flex items-center gap-1">
                         <LanguageSwitcher compact />

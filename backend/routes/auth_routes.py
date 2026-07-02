@@ -41,6 +41,7 @@ def _to_public_user(doc: dict) -> dict:
         "notify_on_scan": doc.get("notify_on_scan", False),
         "locale": doc.get("locale", "en"),
         "auth_provider": doc.get("auth_provider", "password"),
+        "role": doc.get("role", "user"),
         "created_at": doc.get("created_at", datetime.now(timezone.utc).isoformat()),
     }
 

@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import {
     ArrowRight,
     Bike,
+    Cloud,
+    Mail,
     Briefcase,
     HeartPulse,
     KeyRound,
@@ -14,6 +16,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "../components/ui/button";
+import { FeedbackSection } from "../components/FeedbackSection";
+import { LiveStats } from "../components/LiveStats";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { SponsorSection } from "../components/SponsorSection";
 import { ThemeToggle } from "../components/ThemeToggle";
@@ -131,6 +135,9 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* Live public stats */}
+            <LiveStats />
+
             {/* Features */}
             <section className="border-y bg-muted/30">
                 <div className="mx-auto max-w-6xl px-4 sm:px-8 py-16 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -171,14 +178,29 @@ export default function LandingPage() {
             {/* Sponsor a tag — civic enhancement */}
             <SponsorSection />
 
+            {/* Feedback & comments */}
+            <FeedbackSection />
+
             <footer className="border-t mt-10">
                 <div className="mx-auto max-w-6xl px-4 sm:px-8 py-10 grid sm:grid-cols-2 gap-6 text-sm">
                     <div>
                         <div className="font-display font-black text-lg">Info<span className="text-accent">Tag</span></div>
                         <p className="text-muted-foreground mt-2 max-w-md">{t("common.tagline")}</p>
-                        <p className="text-xs mt-3 text-muted-foreground">
-                            Founder · Anand Lakhera · an.31and@gmail.com · +91 89042 23100
-                        </p>
+                        <div className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                            <p className="flex items-center gap-1.5" data-testid="footer-founder">
+                                <Cloud className="h-3.5 w-3.5 text-accent shrink-0" />
+                                <span>
+                                    Founder: <span className="font-semibold text-foreground">Anand Lakhera</span> — Cloud FinOps
+                                    Engineer &amp; DevOps Consultant
+                                </span>
+                            </p>
+                            <p className="flex items-center gap-1.5" data-testid="footer-contact">
+                                <Mail className="h-3.5 w-3.5 text-accent shrink-0" />
+                                <a href="mailto:anandlakhera@info-tag.in" className="hover:text-accent underline-offset-2 hover:underline">
+                                    anandlakhera@info-tag.in
+                                </a>
+                            </p>
+                        </div>
                     </div>
                     <div className="sm:text-right flex sm:justify-end gap-5 flex-wrap items-center">
                         <Link to="/privacy" className="hover:text-accent" data-testid="footer-privacy">{t("legal.privacy")}</Link>

@@ -16,11 +16,13 @@ from starlette.middleware.cors import CORSMiddleware  # noqa: E402
 
 from db import close_db, ensure_indexes, get_db, seed_admin_and_demo  # noqa: E402
 from notifications import email_enabled, twilio_enabled, whatsapp_enabled  # noqa: E402
+from routes.admin_routes import router as admin_router  # noqa: E402
 from routes.auth_routes import router as auth_router  # noqa: E402
 from routes.finder_ssr import router as finder_ssr_router  # noqa: E402
 from routes.message_routes import router as message_router  # noqa: E402
 from routes.pdf_routes import router as pdf_router  # noqa: E402
 from routes.profile_routes import router as profile_router  # noqa: E402
+from routes.public_routes import router as public_router  # noqa: E402
 from routes.sponsor_routes import router as sponsor_router  # noqa: E402
 from routes.tag_routes import router as tag_router  # noqa: E402
 
@@ -66,6 +68,8 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(admin_router)
+app.include_router(public_router)
 app.include_router(tag_router)
 app.include_router(profile_router)
 app.include_router(message_router)

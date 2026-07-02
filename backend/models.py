@@ -43,6 +43,7 @@ class UserPublic(BaseModel):
     notify_on_scan: bool = False
     locale: str = "en"
     auth_provider: str = "password"  # password | google | both
+    role: str = "user"  # user | admin
     created_at: str
 
 
@@ -163,6 +164,17 @@ class MessageOut(BaseModel):
     body: str
     location: Optional[dict[str, float]]
     created_at: str
+
+
+# ---------------------------------------------------------------------------
+# Feedback / comments (public submission, admin-moderated visibility)
+# ---------------------------------------------------------------------------
+class FeedbackCreatePayload(BaseModel):
+    name: str = ""
+    email: str = ""
+    message: str = Field(min_length=1, max_length=2000)
+    rating: int = Field(default=5, ge=1, le=5)
+    bot_check: str = ""  # honeypot; should remain empty
 
 
 # ---------------------------------------------------------------------------

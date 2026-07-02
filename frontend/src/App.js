@@ -1,13 +1,17 @@
 import "@/App.css";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 
+import { useEffect } from "react";
+
 import { AuthCallback, AuthProvider, ProtectedRoute, useAuth } from "@/lib/auth";
+import api from "@/lib/api";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 
 import { AppShell } from "@/components/AppShell";
 import { Toaster } from "@/components/ui/sonner";
 
+import AdminPage from "@/pages/Admin";
 import LandingPage from "@/pages/Landing";
 import AuthPage from "@/pages/Auth";
 import DashboardPage from "@/pages/Dashboard";
@@ -62,11 +66,30 @@ function AppRouter() {
                 <Route path="/tags/:id" element={<TagEditPage />} />
                 <Route path="/tags/:id/qr" element={<TagQRPage />} />
                 <Route path="/tags/:id/medical" element={<TagMedicalPage />} />
+                <Route
+                    path="/admin"
+                    element={
+                        <AdminOnly>
+                            <AdminPage />
+                        </AdminOnly>
+                    }
+                />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
     );
+}
+
+/**
+ * AdminOnly — client-side gate for the founder portal. The backend
+ * re-verifies role on every /api/admin/* call, so this is UX, not security.
+ */
+function AdminOnly({ children }) {
+    const { user, loading } = useAuth();
+    if (loading) return null;
+    if (!user || user.role !== "admin") return <Navigate to="/dashboard" replace />;
+    return children;
 }
 
 function HomeOrDashboard() {
@@ -82,6 +105,19 @@ function HomeOrDashboard() {
 }
 
 export default function App() {
+    // Privacy-friendly visit counter: one beacon per browser session.
+    // Server dedupes per hashed-IP per day, so refreshes never inflate counts.
+    useEffect(() => {
+        try {
+            if (!sessionStorage.getItem("infotag_visited")) {
+                sessionStorage.setItem("infotag_visited", "1");
+                api.post("/public/visit").catch(() => {});
+            }
+        } catch {
+            api.post("/public/visit").catch(() => {});
+        }
+    }, []);
+
     return (
         <ThemeProvider>
             <I18nProvider>

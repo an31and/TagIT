@@ -55,8 +55,14 @@ async def post_finder_message(
     if not doc.get("owner_id"):
         raise HTTPException(status_code=400, detail="This tag is not yet claimed")
 
-    # Rate-limit identical finder action within last 60s per hashed IP
-    ip = request.client.host if request.client else "0.0.0.0"
+    # Rate-limit identical finder action within last 60s per hashed IP.
+    # Use the left-most X-Forwarded-For entry (consistent with scan tracking)
+    # so the limit still works behind nginx / a PaaS load balancer.
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        ip = fwd.split(",")[0].strip()
+    else:
+        ip = request.client.host if request.client else "0.0.0.0"
     ip_h = hash_ip(ip)
     recent = await db.messages.find_one(
         {
