@@ -1,7 +1,7 @@
 From 7291bbb2b9ee7c5002cfb534b17fd066efeee509 Mon Sep 17 00:00:00 2001
 From: InfoTag rename <dev@example.com>
 Date: Wed, 1 Jul 2026 06:43:25 +0000
-Subject: [PATCH 1/2] Rebrand: TagIT -> InfoTag across code, UI, PWA, tests
+Subject: [PATCH 1/5] Rebrand: TagIT -> InfoTag across code, UI, PWA, tests
  (domain tagit.in left intact by design)
 
 ---
@@ -880,7 +880,7 @@ index 7f4e705..defbf90 100644
 From f0bee5df739c2feb4841257518083c0f052825ae Mon Sep 17 00:00:00 2001
 From: InfoTag rename <dev@example.com>
 Date: Wed, 1 Jul 2026 06:45:03 +0000
-Subject: [PATCH 2/2] docs: add DEPLOYMENT.md runbook and backend/.env.example
+Subject: [PATCH 2/5] docs: add DEPLOYMENT.md runbook and backend/.env.example
 
 ---
  DEPLOYMENT.md | 251 ++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1144,6 +1144,708 @@ index 0000000..d9f9def
 +---
 +
 +*Generated as part of the InfoTag rebrand. Adjust example domains/URLs to your own before use.*
+-- 
+2.43.0
+
+
+From 774a57e050b59e9a4f4b04e9c8effdde092030bc Mon Sep 17 00:00:00 2001
+From: InfoTag rename <dev@example.com>
+Date: Thu, 2 Jul 2026 03:47:08 +0000
+Subject: [PATCH 3/5] Set domain to info-tag.in (QR label, sender, admin
+ defaults)
+
+---
+ DEPLOYMENT.md                                 | 12 ++++++------
+ auth_testing.md                               |  4 ++--
+ backend/db.py                                 |  2 +-
+ backend/notifications.py                      |  2 +-
+ backend/routes/pdf_routes.py                  |  8 ++++----
+ backend/tests/backend_test.py                 |  6 +++---
+ backend/tests/test_finder_ssr.py              |  2 +-
+ backend/tests/test_iteration2_new_features.py |  8 ++++----
+ 8 files changed, 22 insertions(+), 22 deletions(-)
+
+diff --git a/DEPLOYMENT.md b/DEPLOYMENT.md
+index d9f9def..ef6a53c 100644
+--- a/DEPLOYMENT.md
++++ b/DEPLOYMENT.md
+@@ -192,16 +192,16 @@ cd backend && pip install -r requirements.txt && pytest tests/
+ 
+ ## 7. Domain decision — read this before printing anything
+ 
+-The rename changed the **brand** to InfoTag, but the codebase still contains the **domain `tagit.in`** in several places that were intentionally left untouched, because a brand name and a registered domain are separate things:
++The rename changed the **brand** to InfoTag, but the codebase still contains the **domain `info-tag.in`** in several places that were intentionally left untouched, because a brand name and a registered domain are separate things:
+ 
+-- Default sender addresses (`no-reply@tagit.in`, `admin@tagit.in`)
+-- Seed/test admin emails (`anand@tagit.in`)
+-- **Printed on QR stickers**: the PDF generators print `"InfoTag · tagit.in"` and `"or visit tagit.in/api/finder/{slug}"`
++- Default sender addresses (`no-reply@info-tag.in`, `admin@info-tag.in`)
++- Seed/test admin emails (`anand@info-tag.in`)
++- **Printed on QR stickers**: the PDF generators print `"InfoTag · info-tag.in"` and `"or visit info-tag.in/api/finder/{slug}"`
+ 
+ You need to make a conscious choice:
+ 
+-1. **Keep `tagit.in`** as the operational domain — then the printed stickers will read `InfoTag · tagit.in` (brand and domain differ, which is common and fine).
+-2. **Move to a new domain** (e.g. `infotag.in`) — then register it, and update the domain string in `backend/routes/pdf_routes.py` (two `tagit.in/api/finder` strings + two footer strings) and `backend/notifications.py` / `backend/db.py` sender defaults.
++1. **Keep `info-tag.in`** as the operational domain — then the printed stickers will read `InfoTag · info-tag.in` (brand and domain differ, which is common and fine).
++2. **Move to a new domain** (e.g. `infotag.in`) — then register it, and update the domain string in `backend/routes/pdf_routes.py` (two `info-tag.in/api/finder` strings + two footer strings) and `backend/notifications.py` / `backend/db.py` sender defaults.
+ 
+ Whatever you choose, the QR URL your stickers point to must match the domain where the **backend** is reachable, because scanning hits `/{domain}/api/finder/{slug}` directly.
+ 
+diff --git a/auth_testing.md b/auth_testing.md
+index e178b80..527975f 100644
+--- a/auth_testing.md
++++ b/auth_testing.md
+@@ -9,7 +9,7 @@ Two auth paths converge on the same JWT cookie session:
+ ```
+ mongosh
+ use test_database
+-db.users.findOne({ email: "anand@tagit.in" })
++db.users.findOne({ email: "anand@info-tag.in" })
+ db.users.getIndexes()        // expect unique on email
+ db.tags.getIndexes()         // expect unique on slug
+ ```
+@@ -20,7 +20,7 @@ Expect bcrypt hash starting with `$2b$` for the seeded admin.
+ API=$(grep REACT_APP_BACKEND_URL /app/frontend/.env | cut -d= -f2)
+ curl -c /tmp/c.txt -X POST "$API/api/auth/login" \
+   -H "Content-Type: application/json" \
+-  -d '{"email":"anand@tagit.in","password":"InfoTagAdmin@2026"}'
++  -d '{"email":"anand@info-tag.in","password":"InfoTagAdmin@2026"}'
+ curl -b /tmp/c.txt "$API/api/auth/me"
+ curl -b /tmp/c.txt "$API/api/tags"           # should list demo tags
+ ```
+diff --git a/backend/db.py b/backend/db.py
+index c2b86d7..d6c2e6e 100644
+--- a/backend/db.py
++++ b/backend/db.py
+@@ -48,7 +48,7 @@ async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
+ 
+ async def seed_admin_and_demo(db: AsyncIOMotorDatabase) -> None:
+     """Create an admin account + demo tags so the app is testable on boot."""
+-    admin_email = os.environ.get("ADMIN_EMAIL", "admin@tagit.in")
++    admin_email = os.environ.get("ADMIN_EMAIL", "admin@info-tag.in")
+     admin_password = os.environ.get("ADMIN_PASSWORD", "admin123")
+ 
+     admin = await db.users.find_one({"email": admin_email}, {"_id": 0})
+diff --git a/backend/notifications.py b/backend/notifications.py
+index 435f373..2d74cc0 100644
+--- a/backend/notifications.py
++++ b/backend/notifications.py
+@@ -25,7 +25,7 @@ def send_email(to_email: str, subject: str, body: str) -> bool:
+     """Best-effort email sender.  Returns True if the email was dispatched."""
+     if not to_email:
+         return False
+-    from_email = os.environ.get("EMAIL_FROM") or "no-reply@tagit.in"
++    from_email = os.environ.get("EMAIL_FROM") or "no-reply@info-tag.in"
+ 
+     sendgrid_key = os.environ.get("SENDGRID_API_KEY")
+     if sendgrid_key:
+diff --git a/backend/routes/pdf_routes.py b/backend/routes/pdf_routes.py
+index d20d118..1e807db 100644
+--- a/backend/routes/pdf_routes.py
++++ b/backend/routes/pdf_routes.py
+@@ -127,13 +127,13 @@ def _draw_a4_stickers(buf, pil, slug, label, caption, tag_type) -> None:
+             # Header
+             c.setFillColor(EMERGENCY_RED if tag_type == "medical" else ASHOKA_NAVY)
+             c.setFont("Helvetica-Bold", 9)
+-            c.drawCentredString(x + cell_w / 2, y + cell_h - 8 * mm, "InfoTag · tagit.in")
++            c.drawCentredString(x + cell_w / 2, y + cell_h - 8 * mm, "InfoTag · info-tag.in")
+             # Caption
+             c.setFillColor(black)
+             c.setFont("Helvetica-Bold", 8)
+             c.drawCentredString(x + cell_w / 2, y + 10 * mm, caption.upper()[:38])
+             c.setFont("Helvetica", 6.5)
+-            c.drawCentredString(x + cell_w / 2, y + 6.5 * mm, f"or visit tagit.in/api/finder/{slug}")
++            c.drawCentredString(x + cell_w / 2, y + 6.5 * mm, f"or visit info-tag.in/api/finder/{slug}")
+             c.setFont("Helvetica-Oblique", 6)
+             c.setFillColor(HexColor("#666666"))
+             c.drawCentredString(x + cell_w / 2, y + 3.5 * mm, "Privacy-first • Made in India")
+@@ -183,7 +183,7 @@ def _draw_id_card(buf, pil, slug, label, caption, tag_type) -> None:
+     c.drawString(text_x, y + card_h - 16 * mm, caption[:32])
+     c.setFont("Helvetica", 6.5)
+     c.drawString(text_x, y + 14 * mm, "Scan the QR with any phone camera.")
+-    c.drawString(text_x, y + 10 * mm, f"or visit tagit.in/api/finder/{slug}")
++    c.drawString(text_x, y + 10 * mm, f"or visit info-tag.in/api/finder/{slug}")
+     c.setFillColor(HexColor("#666666"))
+     c.setFont("Helvetica-Oblique", 6)
+     c.drawString(text_x, y + 6 * mm, "No app needed for the finder.")
+@@ -212,6 +212,6 @@ def _draw_keyring(buf, pil, slug, label, caption, tag_type) -> None:
+             _draw_qr(c, pil, x + (size - qr_size) / 2, y + (size - qr_size) / 2 + 2 * mm, qr_size)
+             c.setFillColor(EMERGENCY_RED if tag_type == "medical" else ASHOKA_NAVY)
+             c.setFont("Helvetica-Bold", 6)
+-            c.drawCentredString(x + size / 2, y + 3.5 * mm, "InfoTag · tagit.in")
++            c.drawCentredString(x + size / 2, y + 3.5 * mm, "InfoTag · info-tag.in")
+     c.showPage()
+     c.save()
+diff --git a/backend/tests/backend_test.py b/backend/tests/backend_test.py
+index f86f924..8201ac0 100644
+--- a/backend/tests/backend_test.py
++++ b/backend/tests/backend_test.py
+@@ -12,7 +12,7 @@ import pytest
+ import requests
+ 
+ BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com").rstrip("/")
+-ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
++ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@info-tag.in")
+ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "InfoTagAdmin@2026")
+ 
+ 
+@@ -28,7 +28,7 @@ def admin_session():
+ @pytest.fixture(scope="session")
+ def second_user_session():
+     s = requests.Session()
+-    email = f"test_user_{uuid.uuid4().hex[:8]}@tagit.in"
++    email = f"test_user_{uuid.uuid4().hex[:8]}@info-tag.in"
+     r = s.post(f"{BASE_URL}/api/auth/register", json={
+         "email": email, "password": "SecondUser@2026", "display_name": "Second Tester"
+     })
+@@ -80,7 +80,7 @@ class TestIntegrationPlaceholders:
+ class TestAuth:
+     def test_register_new_user_and_me(self):
+         s = requests.Session()
+-        email = f"test_register_{uuid.uuid4().hex[:8]}@tagit.in"
++        email = f"test_register_{uuid.uuid4().hex[:8]}@info-tag.in"
+         r = s.post(f"{BASE_URL}/api/auth/register", json={
+             "email": email, "password": "Strong@1234", "display_name": "Reg Tester"
+         })
+diff --git a/backend/tests/test_finder_ssr.py b/backend/tests/test_finder_ssr.py
+index fe799a9..03ef7bf 100644
+--- a/backend/tests/test_finder_ssr.py
++++ b/backend/tests/test_finder_ssr.py
+@@ -14,7 +14,7 @@ import pytest
+ import requests
+ 
+ BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com").rstrip("/")
+-ADMIN_EMAIL = "anand@tagit.in"
++ADMIN_EMAIL = "anand@info-tag.in"
+ ADMIN_PASSWORD = "InfoTagAdmin@2026"
+ 
+ 
+diff --git a/backend/tests/test_iteration2_new_features.py b/backend/tests/test_iteration2_new_features.py
+index b64c539..5963722 100644
+--- a/backend/tests/test_iteration2_new_features.py
++++ b/backend/tests/test_iteration2_new_features.py
+@@ -21,7 +21,7 @@ BASE_URL = os.environ.get(
+     "REACT_APP_BACKEND_URL", "https://smart-tags-dev.preview.emergentagent.com"
+ ).rstrip("/")
+ 
+-ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@tagit.in")
++ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "anand@info-tag.in")
+ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "InfoTagAdmin@2026")
+ 
+ 
+@@ -121,7 +121,7 @@ class TestScanDedupe:
+ class TestRightToBeForgotten:
+     def _signup(self):
+         s = requests.Session()
+-        email = f"rtbf_{uuid.uuid4().hex[:8]}@tagit.in"
++        email = f"rtbf_{uuid.uuid4().hex[:8]}@info-tag.in"
+         pwd = "Rtbf@2026!"
+         r = s.post(
+             f"{BASE_URL}/api/auth/register",
+@@ -205,7 +205,7 @@ class TestSponsor:
+         before = requests.get(f"{BASE_URL}/api/sponsors/stats").json()
+         payload = {
+             "name": "TEST_Sponsor",
+-            "email": f"TEST_sponsor_{uuid.uuid4().hex[:6]}@tagit.in",
++            "email": f"TEST_sponsor_{uuid.uuid4().hex[:6]}@info-tag.in",
+             "tag_count": 50,
+             "message": "Happy to fund 50 stickers",
+         }
+@@ -223,7 +223,7 @@ class TestSponsor:
+         before = requests.get(f"{BASE_URL}/api/sponsors/stats").json()
+         payload = {
+             "name": "TEST_Bot",
+-            "email": f"TEST_bot_{uuid.uuid4().hex[:6]}@tagit.in",
++            "email": f"TEST_bot_{uuid.uuid4().hex[:6]}@info-tag.in",
+             "tag_count": 10,
+             "message": "bot",
+             "bot_check": "i am a bot",
+-- 
+2.43.0
+
+
+From f6a018c911fa882a88d4fb78cdab026bef74486e Mon Sep 17 00:00:00 2001
+From: InfoTag rename <dev@example.com>
+Date: Thu, 2 Jul 2026 04:08:00 +0000
+Subject: [PATCH 4/5] feat: admin analytics dashboard
+ (visitors/scans/items-found) + landing founder/support update
+
+- backend: /api/admin/stats (admin-only) + public /api/metrics/visit beacon
+- expose user role via /auth/me for client-side gating (server still enforces)
+- frontend: Admin dashboard page, admin-only nav tab, landing visit beacon
+- landing footer: founder title + support email anandlakhera@info-tag.in
+---
+ backend/db.py                        |   1 +
+ backend/models.py                    |   1 +
+ backend/routes/admin_routes.py       |  90 ++++++++++++++++
+ backend/routes/auth_routes.py        |   1 +
+ backend/server.py                    |   2 +
+ frontend/src/App.js                  |   2 +
+ frontend/src/components/AppShell.jsx |   5 +-
+ frontend/src/pages/Admin.jsx         | 155 +++++++++++++++++++++++++++
+ frontend/src/pages/Landing.jsx       |  16 ++-
+ 9 files changed, 271 insertions(+), 2 deletions(-)
+ create mode 100644 backend/routes/admin_routes.py
+ create mode 100644 frontend/src/pages/Admin.jsx
+
+diff --git a/backend/db.py b/backend/db.py
+index d6c2e6e..6cc6a74 100644
+--- a/backend/db.py
++++ b/backend/db.py
+@@ -38,6 +38,7 @@ async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
+     await db.tags.create_index("id", unique=True)
+     await db.profiles.create_index("tag_id", unique=True)
+     await db.scans.create_index("tag_id")
++    await db.metrics.create_index("type")
+     await db.messages.create_index("tag_id")
+     await db.login_attempts.create_index("identifier")
+     await db.login_attempts.create_index(
+diff --git a/backend/models.py b/backend/models.py
+index 5e16ec3..23bdc63 100644
+--- a/backend/models.py
++++ b/backend/models.py
+@@ -43,6 +43,7 @@ class UserPublic(BaseModel):
+     notify_on_scan: bool = False
+     locale: str = "en"
+     auth_provider: str = "password"  # password | google | both
++    role: str = "user"  # user | admin
+     created_at: str
+ 
+ 
+diff --git a/backend/routes/admin_routes.py b/backend/routes/admin_routes.py
+new file mode 100644
+index 0000000..ae37a10
+--- /dev/null
++++ b/backend/routes/admin_routes.py
+@@ -0,0 +1,90 @@
++"""Admin analytics + public visit beacon.
++
++Exposes:
++  GET  /api/admin/stats   → admin-only dashboard metrics
++  POST /api/metrics/visit → public, fire-and-forget landing-page visit counter
++
++Visitor counts are stored as lightweight per-day aggregate documents in the
++`metrics` collection (one doc per day, atomic $inc) so the collection never
++grows with traffic and a simple 7-day trend is cheap to read.
++"""
++from __future__ import annotations
++
++from datetime import datetime, timedelta, timezone
++
++from fastapi import APIRouter, Depends, HTTPException, Request
++
++from auth import get_current_user
++from db import get_db
++
++router = APIRouter(prefix="/api", tags=["admin"])
++
++
++def _today() -> str:
++    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
++
++
++async def require_admin(request: Request) -> dict:
++    """Allow only users whose role is 'admin'. Enforced server-side regardless
++    of anything the client claims."""
++    user = await get_current_user(request, get_db())
++    if user.get("role") != "admin":
++        raise HTTPException(status_code=403, detail="Admin access required")
++    return user
++
++
++@router.post("/metrics/visit")
++async def record_visit() -> dict:
++    """Public beacon the landing page pings once on load. Best-effort; never
++    blocks or errors the client experience."""
++    db = get_db()
++    day = _today()
++    try:
++        await db.metrics.update_one(
++            {"_id": f"visit:{day}"},
++            {"$inc": {"count": 1}, "$setOnInsert": {"type": "visit", "day": day}},
++            upsert=True,
++        )
++    except Exception:
++        # Analytics must never break the page.
++        return {"ok": False}
++    return {"ok": True}
++
++
++@router.get("/admin/stats")
++async def admin_stats(_: dict = Depends(require_admin)) -> dict:
++    db = get_db()
++
++    scans_total = await db.scans.count_documents({})
++    items_found = await db.tags.count_documents({"status": "found"})
++    lost_active = await db.tags.count_documents({"status": "lost"})
++    total_tags = await db.tags.count_documents({})
++    total_users = await db.users.count_documents({})
++    messages_total = await db.messages.count_documents({})
++
++    # Visitors: sum of all daily visit counters.
++    visitors_total = 0
++    visit_cursor = db.metrics.find({"type": "visit"}, {"count": 1})
++    async for doc in visit_cursor:
++        visitors_total += int(doc.get("count", 0))
++
++    # Last 7 days trend (oldest → newest), zero-filled for missing days.
++    days = [
++        (datetime.now(timezone.utc) - timedelta(days=i)).strftime("%Y-%m-%d")
++        for i in range(6, -1, -1)
++    ]
++    day_docs = {}
++    async for doc in db.metrics.find({"_id": {"$in": [f"visit:{d}" for d in days]}}):
++        day_docs[doc["day"]] = int(doc.get("count", 0))
++    visits_last_7_days = [{"day": d, "count": day_docs.get(d, 0)} for d in days]
++
++    return {
++        "visitors_total": visitors_total,
++        "scans_total": scans_total,
++        "items_found": items_found,
++        "lost_active": lost_active,
++        "total_tags": total_tags,
++        "total_users": total_users,
++        "messages_total": messages_total,
++        "visits_last_7_days": visits_last_7_days,
++    }
+diff --git a/backend/routes/auth_routes.py b/backend/routes/auth_routes.py
+index df18141..3e7f9d9 100644
+--- a/backend/routes/auth_routes.py
++++ b/backend/routes/auth_routes.py
+@@ -41,6 +41,7 @@ def _to_public_user(doc: dict) -> dict:
+         "notify_on_scan": doc.get("notify_on_scan", False),
+         "locale": doc.get("locale", "en"),
+         "auth_provider": doc.get("auth_provider", "password"),
++        "role": doc.get("role", "user"),
+         "created_at": doc.get("created_at", datetime.now(timezone.utc).isoformat()),
+     }
+ 
+diff --git a/backend/server.py b/backend/server.py
+index 7ea5c65..a5c62ea 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -16,6 +16,7 @@ from starlette.middleware.cors import CORSMiddleware  # noqa: E402
+ 
+ from db import close_db, ensure_indexes, get_db, seed_admin_and_demo  # noqa: E402
+ from notifications import email_enabled, twilio_enabled, whatsapp_enabled  # noqa: E402
++from routes.admin_routes import router as admin_router  # noqa: E402
+ from routes.auth_routes import router as auth_router  # noqa: E402
+ from routes.finder_ssr import router as finder_ssr_router  # noqa: E402
+ from routes.message_routes import router as message_router  # noqa: E402
+@@ -72,6 +73,7 @@ app.include_router(message_router)
+ app.include_router(pdf_router)
+ app.include_router(sponsor_router)
+ app.include_router(finder_ssr_router)
++app.include_router(admin_router)
+ 
+ 
+ @app.get("/api")
+diff --git a/frontend/src/App.js b/frontend/src/App.js
+index 9f8aa2c..2a6b412 100644
+--- a/frontend/src/App.js
++++ b/frontend/src/App.js
+@@ -16,6 +16,7 @@ import TagQRPage from "@/pages/TagQR";
+ import TagMedicalPage from "@/pages/TagMedical";
+ import InboxPage from "@/pages/Inbox";
+ import SettingsPage from "@/pages/Settings";
++import AdminPage from "@/pages/Admin";
+ import { FinderRedirect } from "@/pages/FinderRedirect";
+ import ClaimPage from "@/pages/Claim";
+ import { MedicalDisclaimerPage, PrivacyPage, TermsPage } from "@/pages/Legal";
+@@ -58,6 +59,7 @@ function AppRouter() {
+                 <Route path="/dashboard" element={<DashboardPage />} />
+                 <Route path="/inbox" element={<InboxPage />} />
+                 <Route path="/settings" element={<SettingsPage />} />
++                <Route path="/admin" element={<AdminPage />} />
+                 <Route path="/tags/new" element={<TagEditPage />} />
+                 <Route path="/tags/:id" element={<TagEditPage />} />
+                 <Route path="/tags/:id/qr" element={<TagQRPage />} />
+diff --git a/frontend/src/components/AppShell.jsx b/frontend/src/components/AppShell.jsx
+index a1b815b..12ebdb6 100644
+--- a/frontend/src/components/AppShell.jsx
++++ b/frontend/src/components/AppShell.jsx
+@@ -1,5 +1,5 @@
+ import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
+-import { Bell, LayoutGrid, LogOut, Settings as SettingsIcon, Tag } from "lucide-react";
++import { Bell, LayoutGrid, LogOut, Settings as SettingsIcon, ShieldCheck, Tag } from "lucide-react";
+ 
+ import { Button } from "../components/ui/button";
+ import { useAuth } from "../lib/auth";
+@@ -39,6 +39,9 @@ export function AppShell() {
+                         <NavTab to="/dashboard" icon={<LayoutGrid className="h-4 w-4" />} label={t("common.dashboard")} testId="nav-dashboard" />
+                         <NavTab to="/inbox" icon={<Bell className="h-4 w-4" />} label={t("common.inbox")} testId="nav-inbox" />
+                         <NavTab to="/settings" icon={<SettingsIcon className="h-4 w-4" />} label={t("common.settings")} testId="nav-settings" />
++                        {user?.role === "admin" && (
++                            <NavTab to="/admin" icon={<ShieldCheck className="h-4 w-4" />} label="Admin" testId="nav-admin" />
++                        )}
+                     </nav>
+                     <div className="flex items-center gap-1">
+                         <LanguageSwitcher compact />
+diff --git a/frontend/src/pages/Admin.jsx b/frontend/src/pages/Admin.jsx
+new file mode 100644
+index 0000000..2c60a3f
+--- /dev/null
++++ b/frontend/src/pages/Admin.jsx
+@@ -0,0 +1,155 @@
++import { useEffect, useState } from "react";
++import { Navigate } from "react-router-dom";
++import {
++    Users,
++    ScanLine,
++    PackageCheck,
++    Tag as TagIcon,
++    Inbox,
++    Search,
++} from "lucide-react";
++
++import api, { formatApiError } from "../lib/api";
++import { useAuth } from "../lib/auth";
++
++export default function AdminPage() {
++    const { user } = useAuth();
++    const [stats, setStats] = useState(null);
++    const [error, setError] = useState("");
++    const [loading, setLoading] = useState(true);
++
++    useEffect(() => {
++        let cancelled = false;
++        (async () => {
++            try {
++                const { data } = await api.get("/admin/stats");
++                if (!cancelled) setStats(data);
++            } catch (err) {
++                if (!cancelled) setError(formatApiError(err));
++            } finally {
++                if (!cancelled) setLoading(false);
++            }
++        })();
++        return () => {
++            cancelled = true;
++        };
++    }, []);
++
++    // Client-side guard. The backend enforces admin independently.
++    if (user && user.role !== "admin") return <Navigate to="/dashboard" replace />;
++
++    return (
++        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8" data-testid="admin-page">
++            <div className="mb-6">
++                <h1 className="font-display font-black text-2xl tracking-tight">Admin overview</h1>
++                <p className="text-sm text-muted-foreground mt-1">
++                    Private dashboard · visible only to you.
++                </p>
++            </div>
++
++            {loading && (
++                <div className="text-muted-foreground animate-pulse-soft">Loading stats…</div>
++            )}
++
++            {!loading && error && (
++                <div className="surface p-6 border-destructive/40 text-sm" data-testid="admin-error">
++                    Couldn’t load stats: {error}
++                </div>
++            )}
++
++            {!loading && stats && (
++                <>
++                    {/* Headline metrics */}
++                    <div className="grid gap-4 sm:grid-cols-3">
++                        <StatCard
++                            icon={<Users className="h-5 w-5" />}
++                            label="Visitors"
++                            value={stats.visitors_total}
++                            hint="Landing-page visits"
++                            testid="stat-visitors"
++                        />
++                        <StatCard
++                            icon={<PackageCheck className="h-5 w-5" />}
++                            label="Items found"
++                            value={stats.items_found}
++                            hint="Tags marked found"
++                            accent
++                            testid="stat-found"
++                        />
++                        <StatCard
++                            icon={<ScanLine className="h-5 w-5" />}
++                            label="Scans"
++                            value={stats.scans_total}
++                            hint="QR finder views"
++                            testid="stat-scans"
++                        />
++                    </div>
++
++                    {/* Supporting numbers */}
++                    <div className="grid gap-4 sm:grid-cols-4 mt-4">
++                        <MiniStat icon={<TagIcon className="h-4 w-4" />} label="Total tags" value={stats.total_tags} />
++                        <MiniStat icon={<Search className="h-4 w-4" />} label="Currently lost" value={stats.lost_active} />
++                        <MiniStat icon={<Users className="h-4 w-4" />} label="Registered users" value={stats.total_users} />
++                        <MiniStat icon={<Inbox className="h-4 w-4" />} label="Messages" value={stats.messages_total} />
++                    </div>
++
++                    {/* 7-day visits trend */}
++                    <div className="surface p-6 mt-6">
++                        <div className="font-display font-bold mb-4">Visitors · last 7 days</div>
++                        <SevenDayBars data={stats.visits_last_7_days} />
++                    </div>
++                </>
++            )}
++        </div>
++    );
++}
++
++function StatCard({ icon, label, value, hint, accent, testid }) {
++    return (
++        <div className={`surface p-6 ${accent ? "border-accent/40" : ""}`} data-testid={testid}>
++            <div
++                className={`inline-flex items-center justify-center w-10 h-10 rounded-lg mb-3 ${
++                    accent ? "bg-accent/10 text-accent" : "bg-primary/10 text-primary"
++                }`}
++            >
++                {icon}
++            </div>
++            <div className="font-display font-black text-3xl leading-none">{value ?? 0}</div>
++            <div className="font-medium mt-1">{label}</div>
++            <div className="text-xs text-muted-foreground mt-0.5">{hint}</div>
++        </div>
++    );
++}
++
++function MiniStat({ icon, label, value }) {
++    return (
++        <div className="surface p-4 flex items-center gap-3">
++            <div className="text-muted-foreground">{icon}</div>
++            <div>
++                <div className="font-display font-bold text-lg leading-none">{value ?? 0}</div>
++                <div className="text-xs text-muted-foreground mt-0.5">{label}</div>
++            </div>
++        </div>
++    );
++}
++
++function SevenDayBars({ data }) {
++    const max = Math.max(1, ...data.map((d) => d.count));
++    return (
++        <div className="flex items-end gap-2 h-32" data-testid="admin-7day">
++            {data.map((d) => (
++                <div key={d.day} className="flex-1 flex flex-col items-center gap-2">
++                    <div className="w-full flex items-end justify-center h-full">
++                        <div
++                            className="w-full max-w-[36px] rounded-t bg-accent/70"
++                            style={{ height: `${Math.round((d.count / max) * 100)}%`, minHeight: d.count > 0 ? 4 : 2 }}
++                            title={`${d.count} visits`}
++                        />
++                    </div>
++                    <div className="text-[10px] text-muted-foreground">{d.day.slice(5)}</div>
++                    <div className="text-xs font-medium -mt-1">{d.count}</div>
++                </div>
++            ))}
++        </div>
++    );
++}
+diff --git a/frontend/src/pages/Landing.jsx b/frontend/src/pages/Landing.jsx
+index 534d153..d708878 100644
+--- a/frontend/src/pages/Landing.jsx
++++ b/frontend/src/pages/Landing.jsx
+@@ -1,3 +1,4 @@
++import { useEffect } from "react";
+ import { Link, useNavigate } from "react-router-dom";
+ import {
+     ArrowRight,
+@@ -19,6 +20,7 @@ import { SponsorSection } from "../components/SponsorSection";
+ import { ThemeToggle } from "../components/ThemeToggle";
+ import { useI18n } from "../lib/i18n";
+ import { useAuth } from "../lib/auth";
++import api from "../lib/api";
+ 
+ const TAG_TYPES = [
+     { key: "vehicle", icon: Bike, color: "text-accent" },
+@@ -33,6 +35,11 @@ export default function LandingPage() {
+     const { user } = useAuth();
+     const navigate = useNavigate();
+ 
++    // Count a landing-page visit (best-effort; never blocks the page).
++    useEffect(() => {
++        api.post("/metrics/visit").catch(() => {});
++    }, []);
++
+     return (
+         <div className="min-h-screen">
+             {/* Top bar */}
+@@ -177,7 +184,14 @@ export default function LandingPage() {
+                         <div className="font-display font-black text-lg">Info<span className="text-accent">Tag</span></div>
+                         <p className="text-muted-foreground mt-2 max-w-md">{t("common.tagline")}</p>
+                         <p className="text-xs mt-3 text-muted-foreground">
+-                            Founder · Anand Lakhera · an.31and@gmail.com · +91 89042 23100
++                            Founder · Anand Lakhera — FinOps Engineer &amp; DevOps Consultant
++                        </p>
++                        <p className="text-xs mt-1 text-muted-foreground">
++                            Support ·{" "}
++                            <a href="mailto:anandlakhera@info-tag.in" className="hover:text-accent" data-testid="footer-support-email">
++                                anandlakhera@info-tag.in
++                            </a>{" "}
++                            · +91 89042 23100
+                         </p>
+                     </div>
+                     <div className="sm:text-right flex sm:justify-end gap-5 flex-wrap items-center">
+-- 
+2.43.0
+
+
+From a1a7b8c75ade6a5b6e259ce62b063adf84bbb1da Mon Sep 17 00:00:00 2001
+From: InfoTag rename <dev@example.com>
+Date: Thu, 2 Jul 2026 04:13:52 +0000
+Subject: [PATCH 5/5] ci: build backend image and publish to ghcr.io (free
+ registry for Azure Container Apps)
+
+---
+ .github/workflows/backend-image.yml | 37 +++++++++++++++++++++++++++++
+ 1 file changed, 37 insertions(+)
+ create mode 100644 .github/workflows/backend-image.yml
+
+diff --git a/.github/workflows/backend-image.yml b/.github/workflows/backend-image.yml
+new file mode 100644
+index 0000000..b478852
+--- /dev/null
++++ b/.github/workflows/backend-image.yml
+@@ -0,0 +1,37 @@
++name: Build backend image
++
++# Builds the FastAPI backend and publishes it to GitHub Container Registry
++# (ghcr.io) — free for public images. Azure Container Apps then pulls this
++# public image directly, so no paid Azure Container Registry is needed.
++
++on:
++  push:
++    branches: [main]
++    paths:
++      - "backend/**"
++      - ".github/workflows/backend-image.yml"
++  workflow_dispatch: {}
++
++jobs:
++  build-and-push:
++    runs-on: ubuntu-latest
++    permissions:
++      contents: read
++      packages: write
++    steps:
++      - name: Checkout
++        uses: actions/checkout@v4
++
++      - name: Log in to GitHub Container Registry
++        uses: docker/login-action@v3
++        with:
++          registry: ghcr.io
++          username: ${{ github.actor }}
++          password: ${{ secrets.GITHUB_TOKEN }}
++
++      - name: Build and push
++        uses: docker/build-push-action@v6
++        with:
++          context: ./backend
++          push: true
++          tags: ghcr.io/${{ github.repository_owner }}/infotag-api:latest
 -- 
 2.43.0
 
