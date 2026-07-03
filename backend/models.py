@@ -39,8 +39,11 @@ class UserPublic(BaseModel):
     id: str
     email: EmailStr
     display_name: str = ""
+    phone: str = ""  # E.164-ish; used for alerts + optional direct-contact tags
     notify_on_message: bool = True
     notify_on_scan: bool = False
+    whatsapp_alerts: bool = False  # fan-out finder alerts to WhatsApp (env-gated)
+    sms_alerts: bool = False  # fan-out finder alerts to SMS (env-gated)
     locale: str = "en"
     auth_provider: str = "password"  # password | google | both
     role: str = "user"  # user | admin
@@ -60,8 +63,11 @@ class LoginPayload(BaseModel):
 
 class UpdateUserPayload(BaseModel):
     display_name: Optional[str] = None
+    phone: Optional[str] = Field(default=None, max_length=20)
     notify_on_message: Optional[bool] = None
     notify_on_scan: Optional[bool] = None
+    whatsapp_alerts: Optional[bool] = None
+    sms_alerts: Optional[bool] = None
     locale: Optional[str] = None
 
 
@@ -86,6 +92,27 @@ DEFAULT_PUBLIC_FIELDS: dict[str, bool] = {
     "note": True,
 }
 
+# Per-tag contact preference — the "mask / no-mask" switch.
+#   masked  → the owner's number is NEVER shown; finders reach the owner via
+#             the server relay (message / callback request / Twilio bridge).
+#   direct  → the finder page shows one-tap Call / WhatsApp / SMS deep links
+#             using the owner's phone (free — no telephony provider needed).
+ContactMode = Literal["masked", "direct"]
+
+DEFAULT_CONTACT: dict[str, Any] = {
+    "mode": "masked",
+    "show_call": True,       # direct mode: tel: link · masked mode: callback request
+    "show_whatsapp": True,   # direct mode: wa.me link
+    "show_sms": True,        # direct mode: sms: link
+}
+
+
+class TagContact(BaseModel):
+    mode: ContactMode = "masked"
+    show_call: bool = True
+    show_whatsapp: bool = True
+    show_sms: bool = True
+
 
 class TagCreatePayload(BaseModel):
     type: TagType
@@ -94,6 +121,7 @@ class TagCreatePayload(BaseModel):
     message: str = ""
     data: dict[str, Any] = Field(default_factory=dict)
     public_fields: dict[str, bool] = Field(default_factory=lambda: dict(DEFAULT_PUBLIC_FIELDS))
+    contact: TagContact = Field(default_factory=TagContact)
 
 
 class TagUpdatePayload(BaseModel):
@@ -103,6 +131,7 @@ class TagUpdatePayload(BaseModel):
     status: Optional[TagStatus] = None
     data: Optional[dict[str, Any]] = None
     public_fields: Optional[dict[str, bool]] = None
+    contact: Optional[TagContact] = None
 
 
 class TagOut(BaseModel):
@@ -118,6 +147,7 @@ class TagOut(BaseModel):
     status: TagStatus
     data: dict[str, Any]
     public_fields: dict[str, bool]
+    contact: dict[str, Any] = Field(default_factory=lambda: dict(DEFAULT_CONTACT))
     created_at: str
     updated_at: str
 
@@ -150,6 +180,7 @@ class MessageCreatePayload(BaseModel):
     action_type: ActionType
     finder_name: str = ""
     finder_contact: str = ""
+    finder_phone: str = ""  # used by call_request so the owner can call back
     body: str = ""
     location: Optional[dict[str, float]] = None  # {lat, lng}
     bot_check: str = ""  # honeypot; should remain empty
@@ -188,5 +219,9 @@ class FinderView(BaseModel):
     message: str
     public_data: dict[str, Any]
     is_unclaimed: bool
+    # Contact block — what the finder may use to reach the owner.
+    #   {"mode": "direct", "phone": "+91…", "call": true, "whatsapp": true, "sms": true}
+    #   {"mode": "masked", "callback": true, "masked_call": <twilio-configured>}
+    contact: Optional[dict[str, Any]] = None
     # Medical-only fields (only populated when emergency_mode + consent_given)
     emergency: Optional[dict[str, Any]] = None

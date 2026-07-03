@@ -185,6 +185,91 @@
     animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Use-case showcase animations (landing page) */
+@keyframes scan-sweep {
+    0% { top: 8%; opacity: 0; }
+    12% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { top: 88%; opacity: 0; }
+}
+.animate-scan-sweep {
+    animation: scan-sweep 2.6s ease-in-out infinite;
+}
+@keyframes phone-ring {
+    0%, 100% { transform: rotate(0); }
+    4% { transform: rotate(-10deg); }
+    8% { transform: rotate(9deg); }
+    12% { transform: rotate(-8deg); }
+    16% { transform: rotate(7deg); }
+    20% { transform: rotate(-5deg); }
+    24% { transform: rotate(0); }
+}
+.animate-phone-ring {
+    animation: phone-ring 2.8s ease-in-out infinite;
+    transform-origin: 50% 20%;
+}
+@keyframes travel-dot {
+    0% { left: 8%; opacity: 0; transform: scale(0.6); }
+    12% { opacity: 1; transform: scale(1); }
+    82% { opacity: 1; transform: scale(1); }
+    95%, 100% { left: 86%; opacity: 0; transform: scale(0.6); }
+}
+.animate-travel-dot {
+    animation: travel-dot 2.4s ease-in-out infinite;
+}
+@keyframes heartbeat {
+    0%, 30%, 60%, 100% { transform: scale(1); }
+    10% { transform: scale(1.18); }
+    20% { transform: scale(1); }
+    40% { transform: scale(1.12); }
+}
+.animate-heartbeat {
+    animation: heartbeat 1.6s ease-in-out infinite;
+}
+@keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+}
+.animate-float {
+    animation: float-y 3.4s ease-in-out infinite;
+}
+@keyframes pop-in {
+    0% { opacity: 0; transform: scale(0.7); }
+    70% { transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.animate-pop-in {
+    animation: pop-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes shield-glow {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.35); }
+    50% { box-shadow: 0 0 0 10px hsl(var(--accent) / 0); }
+}
+.animate-shield-glow {
+    animation: shield-glow 2.2s ease-out infinite;
+}
+/* Staggered entrances: apply with .animate-rise on children */
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.45s; }
+
+/* Respect users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+    .animate-scan-sweep,
+    .animate-phone-ring,
+    .animate-travel-dot,
+    .animate-heartbeat,
+    .animate-float,
+    .animate-pop-in,
+    .animate-shield-glow,
+    .animate-rise,
+    .animate-pulse-soft {
+        animation: none !important;
+    }
+}
+
 /* Hide elements only when printing — used by sticker preview screen */
 @media print {
     .no-print { display: none !important; }

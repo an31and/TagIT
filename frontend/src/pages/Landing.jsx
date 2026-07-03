@@ -8,15 +8,18 @@ import {
     HeartPulse,
     KeyRound,
     PawPrint,
+    Phone,
     QrCode,
     ScanLine,
     ShieldCheck,
     Smartphone,
     Tag,
+    Users,
 } from "lucide-react";
 
 import { Button } from "../components/ui/button";
 import { FeedbackSection } from "../components/FeedbackSection";
+import { UseCaseShowcase } from "../components/UseCaseShowcase";
 import { LiveStats } from "../components/LiveStats";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { SponsorSection } from "../components/SponsorSection";
@@ -113,9 +116,9 @@ export default function LandingPage() {
                                 <div className="font-display font-bold text-lg">{t("landing.tag_for_everything")}</div>
                                 <ScanLine className="h-5 w-5 text-accent" />
                             </div>
-                            <ul className="grid grid-cols-2 gap-3">
+                            <ul className="grid grid-cols-2 gap-3 stagger-children">
                                 {TAG_TYPES.map(({ key, icon: Icon, color }) => (
-                                    <li key={key} className="flex items-center gap-3 p-3 rounded-lg border bg-background/60">
+                                    <li key={key} className="flex items-center gap-3 p-3 rounded-lg border bg-background/60 animate-rise">
                                         <Icon className={`h-5 w-5 ${color}`} strokeWidth={2.2} />
                                         <span className="font-medium capitalize">{t(`dashboard.${key}`)}</span>
                                     </li>
@@ -137,6 +140,9 @@ export default function LandingPage() {
 
             {/* Live public stats */}
             <LiveStats />
+
+            {/* Animated use-cases */}
+            <UseCaseShowcase />
 
             {/* Features */}
             <section className="border-y bg-muted/30">
@@ -194,10 +200,22 @@ export default function LandingPage() {
                                     Engineer &amp; DevOps Consultant
                                 </span>
                             </p>
+                            <p className="flex items-center gap-1.5" data-testid="footer-cofounder">
+                                <Users className="h-3.5 w-3.5 text-accent shrink-0" />
+                                <span>
+                                    Co-Founder: <span className="font-semibold text-foreground">Devesh Sen</span>
+                                </span>
+                            </p>
                             <p className="flex items-center gap-1.5" data-testid="footer-contact">
                                 <Mail className="h-3.5 w-3.5 text-accent shrink-0" />
                                 <a href="mailto:anandlakhera@info-tag.in" className="hover:text-accent underline-offset-2 hover:underline">
                                     anandlakhera@info-tag.in
+                                </a>
+                            </p>
+                            <p className="flex items-center gap-1.5" data-testid="footer-phone">
+                                <Phone className="h-3.5 w-3.5 text-accent shrink-0" />
+                                <a href="tel:+918904223100" className="hover:text-accent underline-offset-2 hover:underline">
+                                    +91 89042 23100
                                 </a>
                             </p>
                         </div>

@@ -26,7 +26,7 @@ from fastapi.responses import HTMLResponse
 
 from auth import hash_ip
 from db import get_db
-from notifications import send_email
+from notifications import notify_owner
 
 router = APIRouter(prefix="/api/finder", tags=["finder-ssr"])
 
@@ -67,6 +67,16 @@ STRINGS: dict[str, dict[str, str]] = {
         "em_disclaimer": "Information shown with the owner's consent. Verify identity before treatment.",
         "verify_notice": "Please verify before acting on this information.",
         "last_updated": "Last updated",
+        "contact_owner": "Contact the owner",
+        "call_owner": "Call the owner",
+        "whatsapp_owner": "WhatsApp the owner",
+        "sms_owner": "SMS the owner",
+        "request_callback": "Request a call back",
+        "callback_hint": "Leave your number — the owner is alerted instantly and will call you. Their number stays private.",
+        "your_phone": "Your phone number",
+        "callback_send": "Alert the owner",
+        "privacy_note": "Privacy-protected: the owner's phone number is never shown.",
+        "wa_prefill": "Hi! I scanned your InfoTag",
     },
     "hi": {
         "header": "नमस्ते, किसी ने यह टैग स्कैन किया है।",
@@ -100,6 +110,16 @@ STRINGS: dict[str, dict[str, str]] = {
         "em_disclaimer": "मालिक की सहमति से दिखाई गई जानकारी।",
         "verify_notice": "कार्य करने से पहले जानकारी जाँचें।",
         "last_updated": "आख़िरी बार अपडेट",
+        "contact_owner": "मालिक से संपर्क करें",
+        "call_owner": "मालिक को कॉल करें",
+        "whatsapp_owner": "मालिक को WhatsApp करें",
+        "sms_owner": "मालिक को SMS करें",
+        "request_callback": "कॉल-बैक का अनुरोध करें",
+        "callback_hint": "अपना नंबर छोड़ें — मालिक को तुरंत सूचना मिलेगी और वे आपको कॉल करेंगे। उनका नंबर निजी रहेगा।",
+        "your_phone": "आपका फ़ोन नंबर",
+        "callback_send": "मालिक को सूचित करें",
+        "privacy_note": "गोपनीयता-सुरक्षित: मालिक का फ़ोन नंबर कभी नहीं दिखाया जाता।",
+        "wa_prefill": "नमस्ते! मैंने आपका InfoTag स्कैन किया",
     },
 }
 
@@ -155,6 +175,17 @@ body.em{background:#fef2f2}
 .em-field{margin-bottom:12px}
 .em-call{display:flex;align-items:center;justify-content:center;gap:10px;background:#dc2626;color:#fff;border:none;font-size:18px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;padding:18px;border-radius:18px;text-decoration:none;position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(220,38,38,.25);margin-top:16px}
 .em-call:active{background:#b91c1c}
+
+/* Contact-the-owner buttons */
+.btn-contact{display:flex;align-items:center;gap:10px;justify-content:center;width:100%;padding:14px 18px;border-radius:18px;text-decoration:none;font-weight:700;font-size:15px;margin:0 0 8px;border:none;cursor:pointer;font-family:inherit}
+.btn-call{background:#16a34a;color:#fff}
+.btn-call:active{background:#15803d}
+.btn-wa{background:#25D366;color:#fff}
+.btn-wa:active{background:#1ebe5b}
+.btn-sms{background:#0ea5e9;color:#fff}
+.btn-sms:active{background:#0284c7}
+.privacy-note{display:flex;align-items:center;gap:8px;font-size:12px;color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 10px;margin-top:6px}
+@media (prefers-color-scheme: dark){.privacy-note{background:#052e16;border-color:#14532d;color:#86efac}}
 
 /* Hide elements when JS enables them */
 .no-js-only{display:block}
@@ -269,7 +300,61 @@ def _quick_action_form(slug: str, action: str, label: str, lang: str) -> str:
 </form>"""
 
 
-def render_claimed(lang: str, doc: dict) -> str:
+def _contact_section(lang: str, slug: str, contact: Optional[dict], display_name: str) -> str:
+    """Contact-the-owner block — the mask / no-mask feature.
+
+    direct → free tel: / wa.me / sms: deep links with the owner's number.
+    masked → callback-request form; the owner's number is never in the HTML.
+    """
+    if not contact:
+        return ""
+    from urllib.parse import quote
+
+    heading = f'<h2>{esc(t(lang, "contact_owner"))}</h2>'
+
+    if contact.get("mode") == "direct" and contact.get("phone"):
+        phone = re.sub(r"[^+\d]", "", contact["phone"])
+        wa_digits = phone.lstrip("+")
+        wa_text = quote(f"{t(lang, 'wa_prefill')} — {display_name or slug}")
+        buttons = []
+        if contact.get("call", True):
+            buttons.append(
+                f'<a class="btn-contact btn-call" href="tel:{esc(phone)}" data-testid="finder-call-owner">📞 {esc(t(lang,"call_owner"))}</a>'
+            )
+        if contact.get("whatsapp", True):
+            buttons.append(
+                f'<a class="btn-contact btn-wa" href="https://wa.me/{esc(wa_digits)}?text={wa_text}" rel="noopener" data-testid="finder-whatsapp-owner">💬 {esc(t(lang,"whatsapp_owner"))}</a>'
+            )
+        if contact.get("sms", True):
+            buttons.append(
+                f'<a class="btn-contact btn-sms" href="sms:{esc(phone)}" data-testid="finder-sms-owner">✉️ {esc(t(lang,"sms_owner"))}</a>'
+            )
+        if not buttons:
+            return ""
+        return heading + "".join(buttons)
+
+    if not contact.get("callback", True):
+        return ""
+    # Masked mode — free relay: finder leaves their number, owner calls back.
+    return f"""{heading}
+<div class="card" data-testid="finder-callback-card">
+<div style="font-weight:700;margin-bottom:4px">{esc(t(lang,'request_callback'))}</div>
+<p class="muted" style="margin:0 0 10px">{esc(t(lang,'callback_hint'))}</p>
+<form method="post" action="/api/finder/{esc(slug)}/action" data-testid="finder-callback-form">
+<input type="hidden" name="action_type" value="call_request">
+<input type="hidden" name="lang" value="{esc(lang)}">
+<input type="hidden" name="body" value="Callback requested — please call this finder back.">
+<input type="tel" name="finder_contact" placeholder="{esc(t(lang,'your_phone'))}" required minlength="8" autocomplete="tel" data-testid="finder-callback-phone">
+<input type="text" name="finder_name" placeholder="{esc(t(lang,'your_name'))}" autocomplete="name" data-testid="finder-callback-name">
+<input type="hidden" name="location" value="" data-loc-target>
+<input type="text" name="bot_check" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+<button class="btn-contact btn-call" type="submit" data-testid="finder-callback-send">📞 {esc(t(lang,'callback_send'))}</button>
+</form>
+<div class="privacy-note">🔒 {esc(t(lang,'privacy_note'))}</div>
+</div>"""
+
+
+def render_claimed(lang: str, doc: dict, contact: Optional[dict] = None) -> str:
     actions = QUICK_ACTIONS.get(doc.get("type", "general"), [])
     public_fields = doc.get("public_fields", {})
     display_name = doc.get("display_name", "") if public_fields.get("display_name", True) else ""
@@ -309,6 +394,7 @@ def render_claimed(lang: str, doc: dict) -> str:
 {lost_banner}
 {note_html}
 </div>
+{_contact_section(lang, doc["slug"], contact, display_name)}
 {actions_html}
 <div class="card">
 <h2>{esc(t(lang,'send_message'))}</h2>
@@ -451,7 +537,10 @@ async def finder_page(slug: str, request: Request) -> HTMLResponse:
         if profile and profile.get("emergency_mode") and profile.get("consent_given"):
             return HTMLResponse(render_emergency(lang, doc, profile))
 
-    return HTMLResponse(render_claimed(lang, doc))
+    from routes.tag_routes import build_contact_block
+
+    contact = await build_contact_block(db, doc)
+    return HTMLResponse(render_claimed(lang, doc, contact))
 
 
 @router.post("/{slug}/action", response_class=HTMLResponse)
@@ -528,6 +617,6 @@ async def finder_action(
         )
         if loc:
             text += f"Location: https://maps.google.com/?q={loc['lat']},{loc['lng']}\n"
-        send_email(owner["email"], f"[InfoTag] {action_type.replace('_', ' ')} on your tag", text)
+        notify_owner(owner, f"[InfoTag] {action_type.replace('_', ' ')} on your tag", text)
 
     return HTMLResponse(render_thanks(lang, slug))

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from auth import get_current_user, hash_ip
 from db import get_db
 from models import MessageCreatePayload, MessageOut
-from notifications import send_email
+from notifications import notify_owner
 
 router = APIRouter(prefix="/api", tags=["messages"])
 
@@ -84,12 +84,13 @@ async def post_finder_message(
         except (ValueError, TypeError):
             pass
 
+    finder_contact = _sanitize(payload.finder_contact) or _sanitize(payload.finder_phone)
     msg = {
         "id": f"msg_{uuid.uuid4().hex[:12]}",
         "tag_id": doc["id"],
         "action_type": payload.action_type,
         "finder_name": _sanitize(payload.finder_name),
-        "finder_contact": _sanitize(payload.finder_contact),
+        "finder_contact": finder_contact,
         "body": _sanitize(payload.body),
         "location": payload.location,
         "ip_hash": ip_h,
@@ -97,7 +98,9 @@ async def post_finder_message(
     }
     await db.messages.insert_one(msg)
 
-    # Notify the owner (env-gated; silently skips if not configured)
+    # Alert the owner on every channel they enabled — email + WhatsApp + SMS.
+    # Each channel is env-gated and best-effort, so nothing here can fail the
+    # finder's request.
     owner = await db.users.find_one({"id": doc["owner_id"]}, {"_id": 0})
     if owner and owner.get("notify_on_message", True):
         link = (
@@ -108,7 +111,7 @@ async def post_finder_message(
         )
         if msg.get("location"):
             link += f"Location: https://maps.google.com/?q={msg['location'].get('lat')},{msg['location'].get('lng')}\n"
-        send_email(owner["email"], f"[InfoTag] {payload.action_type.replace('_', ' ')} on your tag", link)
+        notify_owner(owner, f"[InfoTag] {payload.action_type.replace('_', ' ')} on your tag", link)
 
     return {
         "id": msg["id"],

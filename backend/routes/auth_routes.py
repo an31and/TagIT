@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
@@ -37,8 +38,11 @@ def _to_public_user(doc: dict) -> dict:
         "id": doc["id"],
         "email": doc["email"],
         "display_name": doc.get("display_name", ""),
+        "phone": doc.get("phone", ""),
         "notify_on_message": doc.get("notify_on_message", True),
         "notify_on_scan": doc.get("notify_on_scan", False),
+        "whatsapp_alerts": doc.get("whatsapp_alerts", False),
+        "sms_alerts": doc.get("sms_alerts", False),
         "locale": doc.get("locale", "en"),
         "auth_provider": doc.get("auth_provider", "password"),
         "role": doc.get("role", "user"),
@@ -186,6 +190,12 @@ async def google_session(payload: dict, response: Response) -> dict:
 async def update_me(payload: UpdateUserPayload, user: dict = Depends(_current_user_dep)) -> dict:
     db = get_db()
     update = {k: v for k, v in payload.model_dump(exclude_none=True).items()}
+    if "phone" in update:
+        # Keep digits + leading '+' only; an empty string clears the number.
+        cleaned = re.sub(r"[^+\d]", "", update["phone"])
+        if cleaned and len(cleaned.lstrip("+")) < 8:
+            raise HTTPException(status_code=400, detail="Phone number looks too short")
+        update["phone"] = cleaned
     if update:
         await db.users.update_one({"id": user["id"]}, {"$set": update})
     refreshed = await db.users.find_one({"id": user["id"]}, {"_id": 0})
