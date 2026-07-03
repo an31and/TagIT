@@ -57,8 +57,8 @@ export function SponsorSection() {
                     </p>
                     {stats && (
                         <div className="mt-6 flex gap-6">
-                            <Stat n={stats.total_pledged.toLocaleString("en-IN")} label="stickers pledged" />
-                            <Stat n={stats.sponsor_count.toLocaleString("en-IN")} label="kind humans" />
+                            <Stat n={Number(stats.total_pledged || 0).toLocaleString("en-IN")} label="stickers pledged" />
+                            <Stat n={Number(stats.sponsor_count || 0).toLocaleString("en-IN")} label="kind humans" />
                         </div>
                     )}
                     {!open && (

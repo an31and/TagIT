@@ -90,6 +90,8 @@ DEFAULT_PUBLIC_FIELDS: dict[str, bool] = {
     "pet_breed": True,
     # generic notes
     "note": True,
+    # optional thank-you reward shown to finders
+    "reward": True,
 }
 
 # Per-tag contact preference — the "mask / no-mask" switch.

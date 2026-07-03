@@ -255,6 +255,44 @@
 .stagger-children > *:nth-child(4) { animation-delay: 0.35s; }
 .stagger-children > *:nth-child(5) { animation-delay: 0.45s; }
 
+/* Reveal-on-scroll (landing sections) */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.in {
+    opacity: 1;
+    transform: none;
+}
+
+/* Hero QR tag card (landing) */
+.qr-hero-tag {
+    width: min(330px, 86vw);
+    background: linear-gradient(160deg, #fff, #f2efe8);
+    border-radius: 26px;
+    padding: 28px 26px 24px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 32px 70px rgba(0, 0, 0, 0.45), inset 0 2px 0 rgba(255, 255, 255, 0.5);
+    transition: transform 0.2s ease;
+    display: block;
+}
+.qr-hero-tag:hover {
+    transform: translateY(-4px) rotate(-0.4deg);
+}
+
+/* FAQ accordion plus-sign rotation */
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+.faq-item .faq-plus {
+    transition: transform 0.2s ease;
+}
+.faq-item[open] .faq-plus {
+    transform: rotate(45deg);
+}
+
 /* Respect users who prefer less motion */
 @media (prefers-reduced-motion: reduce) {
     .animate-scan-sweep,
@@ -267,6 +305,14 @@
     .animate-rise,
     .animate-pulse-soft {
         animation: none !important;
+    }
+    .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    .qr-hero-tag {
+        transition: none;
     }
 }
 
