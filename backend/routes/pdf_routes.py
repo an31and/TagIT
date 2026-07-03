@@ -18,7 +18,7 @@ from urls import resolve_site_url, site_domain
 
 router = APIRouter(prefix="/api/tags/{tag_id}/pdf", tags=["pdf"])
 
-Layout = Literal["a4_stickers", "id_card", "keyring"]
+Layout = Literal["a4_stickers", "id_card", "keyring", "lost_poster"]
 
 
 async def _current_user_dep(request: Request) -> dict:
@@ -81,6 +81,9 @@ async def generate_pdf(
         _draw_id_card(buf, pil, doc["slug"], label, caption, doc.get("type", "general"), domain)
     elif layout == "keyring":
         _draw_keyring(buf, pil, doc["slug"], label, caption, doc.get("type", "general"), domain)
+    elif layout == "lost_poster":
+        reward = str((doc.get("data") or {}).get("reward", "") or "")
+        _draw_lost_poster(buf, pil, doc["slug"], label, doc.get("type", "general"), domain, reward)
     else:
         raise HTTPException(status_code=400, detail="Unknown layout")
     buf.seek(0)
@@ -189,6 +192,65 @@ def _draw_id_card(buf, pil, slug, label, caption, tag_type, domain) -> None:
     c.setFont("Helvetica-Oblique", 6)
     c.drawString(text_x, y + 6 * mm, "No app needed for the finder.")
 
+    c.showPage()
+    c.save()
+
+
+def _draw_lost_poster(buf, pil, slug, label, tag_type, domain, reward: str = "") -> None:
+    """Full-page A4 'LOST' poster — print, stick on a wall, get it back.
+
+    Big headline, the item name, a huge scannable QR, an optional reward
+    line, and simple instructions.  Made for lamp posts and notice boards.
+    """
+    c = canvas.Canvas(buf, pagesize=A4)
+    page_w, page_h = A4
+
+    # Top band
+    band_h = 42 * mm
+    c.setFillColor(EMERGENCY_RED if tag_type in ("medical", "pet") else ASHOKA_NAVY)
+    c.rect(0, page_h - band_h, page_w, band_h, stroke=0, fill=1)
+    c.setFillColor(white)
+    c.setFont("Helvetica-Bold", 64)
+    headline = "MISSING" if tag_type in ("pet", "special") else "LOST"
+    c.drawCentredString(page_w / 2, page_h - band_h + 11 * mm, headline)
+
+    # Item name
+    c.setFillColor(ASHOKA_NAVY)
+    c.setFont("Helvetica-Bold", 26)
+    c.drawCentredString(page_w / 2, page_h - band_h - 16 * mm, label[:36])
+
+    # Giant QR
+    qr_size = 110 * mm
+    qr_x = (page_w - qr_size) / 2
+    qr_y = page_h - band_h - 24 * mm - qr_size
+    c.setStrokeColor(ASHOKA_NAVY)
+    c.setLineWidth(2)
+    c.roundRect(qr_x - 6 * mm, qr_y - 6 * mm, qr_size + 12 * mm, qr_size + 12 * mm, 8 * mm, stroke=1, fill=0)
+    _draw_qr(c, pil, qr_x, qr_y, qr_size)
+
+    # Instructions
+    y = qr_y - 16 * mm
+    c.setFillColor(black)
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(page_w / 2, y, "Found it? Point your phone camera at the code.")
+    c.setFont("Helvetica", 13)
+    c.drawCentredString(page_w / 2, y - 8 * mm, "A page opens - no app needed. The owner is alerted instantly.")
+    c.setFont("Helvetica", 11)
+    c.setFillColor(HexColor("#555555"))
+    c.drawCentredString(page_w / 2, y - 15 * mm, f"or visit {domain}/api/finder/{slug}")
+
+    # Reward band
+    if reward:
+        c.setFillColor(HexColor("#B45309"))
+        c.roundRect(30 * mm, y - 33 * mm, page_w - 60 * mm, 13 * mm, 6 * mm, stroke=0, fill=1)
+        c.setFillColor(white)
+        c.setFont("Helvetica-Bold", 15)
+        c.drawCentredString(page_w / 2, y - 29 * mm, f"REWARD: {reward[:48]}")
+
+    # Footer
+    c.setFillColor(HexColor("#666666"))
+    c.setFont("Helvetica-Oblique", 10)
+    c.drawCentredString(page_w / 2, 14 * mm, f"Info-Tag - {domain} - Privacy-first - Made in India")
     c.showPage()
     c.save()
 

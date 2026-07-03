@@ -139,6 +139,12 @@ export default function TagQRPage() {
                                 label={t("qr.download_keyring")}
                                 testId="dl-keyring"
                             />
+                            <DownloadButton
+                                url={`${API_BASE}/tags/${tag.id}/pdf?layout=lost_poster`}
+                                filename={`info-tag-${tag.slug}-lost-poster.pdf`}
+                                label={t("qr.download_poster")}
+                                testId="dl-poster"
+                            />
                         </div>
                     </div>
                 </div>

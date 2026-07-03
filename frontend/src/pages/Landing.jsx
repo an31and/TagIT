@@ -70,6 +70,7 @@ export default function LandingPage() {
                         <li><a href="#usecases" className="hover:text-foreground">{t("landing.nav_uses")}</a></li>
                         <li><a href="#features" className="hover:text-foreground">{t("landing.nav_features")}</a></li>
                         <li><a href="#products" className="hover:text-foreground">{t("landing.nav_tags")}</a></li>
+                        <li><Link to="/stories" className="hover:text-foreground" data-testid="nav-stories">{t("landing.nav_stories")}</Link></li>
                         <li><a href="#faq" className="hover:text-foreground">{t("landing.nav_faq")}</a></li>
                     </ul>
                     <div className="flex items-center gap-1">
@@ -316,6 +317,7 @@ export default function LandingPage() {
                                 <li><a href="#how" className="hover:text-white">{t("landing.nav_how")}</a></li>
                                 <li><a href="#features" className="hover:text-white">{t("landing.nav_features")}</a></li>
                                 <li><a href="#products" className="hover:text-white">{t("landing.nav_tags")}</a></li>
+                                <li><Link to="/stories" className="hover:text-white" data-testid="footer-stories">{t("landing.nav_stories")}</Link></li>
                                 <li><a href="#faq" className="hover:text-white">{t("landing.nav_faq")}</a></li>
                                 <li><Link to="/privacy" className="hover:text-white" data-testid="footer-privacy">{t("legal.privacy")}</Link></li>
                                 <li><Link to="/terms" className="hover:text-white" data-testid="footer-terms">{t("legal.terms")}</Link></li>
