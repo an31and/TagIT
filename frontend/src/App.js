@@ -20,6 +20,7 @@ import TagQRPage from "@/pages/TagQR";
 import TagMedicalPage from "@/pages/TagMedical";
 import InboxPage from "@/pages/Inbox";
 import SettingsPage from "@/pages/Settings";
+import StoriesPage from "@/pages/Stories";
 import { FinderRedirect } from "@/pages/FinderRedirect";
 import ClaimPage from "@/pages/Claim";
 import { MedicalDisclaimerPage, PrivacyPage, TermsPage } from "@/pages/Legal";
@@ -46,6 +47,7 @@ function AppRouter() {
 
             <Route path="/tag/:slug" element={<FinderRedirect />} />
             <Route path="/claim/:slug" element={<ClaimPage />} />
+            <Route path="/stories" element={<StoriesPage />} />
 
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
