@@ -27,12 +27,12 @@ import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/i18n";
 
 const TYPE_FIELDS = {
-    vehicle: ["vehicle_make_model", "vehicle_plate"],
-    pet: ["pet_name", "pet_breed", "note"],
-    luggage: ["note"],
-    keys: ["note"],
+    vehicle: ["vehicle_make_model", "vehicle_plate", "reward"],
+    pet: ["pet_name", "pet_breed", "note", "reward"],
+    luggage: ["note", "reward"],
+    keys: ["note", "reward"],
     medical: [],
-    general: ["note"],
+    general: ["note", "reward"],
 };
 
 const EMPTY_TAG = {
@@ -50,6 +50,7 @@ const EMPTY_TAG = {
         pet_name: true,
         pet_breed: true,
         note: true,
+        reward: true,
     },
     contact: {
         mode: "masked",

@@ -77,6 +77,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "callback_send": "Alert the owner",
         "privacy_note": "Privacy-protected: the owner's phone number is never shown.",
         "wa_prefill": "Hi! I scanned your InfoTag",
+        "reward_offered": "Reward for returning this",
     },
     "hi": {
         "header": "नमस्ते, किसी ने यह टैग स्कैन किया है।",
@@ -120,6 +121,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "callback_send": "मालिक को सूचित करें",
         "privacy_note": "गोपनीयता-सुरक्षित: मालिक का फ़ोन नंबर कभी नहीं दिखाया जाता।",
         "wa_prefill": "नमस्ते! मैंने आपका InfoTag स्कैन किया",
+        "reward_offered": "लौटाने पर इनाम",
     },
 }
 
@@ -185,6 +187,8 @@ body.em{background:#fef2f2}
 .btn-sms{background:#0ea5e9;color:#fff}
 .btn-sms:active{background:#0284c7}
 .privacy-note{display:flex;align-items:center;gap:8px;font-size:12px;color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 10px;margin-top:6px}
+.reward{display:flex;align-items:center;gap:10px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e;border-radius:10px;padding:12px 14px;margin-top:14px;font-weight:700;font-size:15px}
+@media (prefers-color-scheme: dark){.reward{background:#3b2f0b;border-color:#a16207;color:#fcd34d}}
 @media (prefers-color-scheme: dark){.privacy-note{background:#052e16;border-color:#14532d;color:#86efac}}
 
 /* Hide elements when JS enables them */
@@ -365,6 +369,12 @@ def render_claimed(lang: str, doc: dict, contact: Optional[dict] = None) -> str:
         if doc.get("status") == "lost"
         else ""
     )
+    reward = (doc.get("data") or {}).get("reward", "")
+    reward_banner = (
+        f'<div class="reward" data-testid="finder-reward">🎁 {esc(t(lang, "reward_offered"))}: {esc(str(reward))}</div>'
+        if reward and public_fields.get("reward", True)
+        else ""
+    )
     note_html = (
         f"""
         <div style="margin-top:14px">
@@ -392,6 +402,7 @@ def render_claimed(lang: str, doc: dict, contact: Optional[dict] = None) -> str:
 <h1 data-testid="finder-display-name">{esc(display_name) or 'InfoTag'}</h1>
 <div class="muted" style="margin-top:4px">{esc(t(lang,'header'))}</div>
 {lost_banner}
+{reward_banner}
 {note_html}
 </div>
 {_contact_section(lang, doc["slug"], contact, display_name)}

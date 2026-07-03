@@ -150,6 +150,10 @@ SMS alerts each switch on when their env vars appear:
 Direct-mode contact buttons (tel:/wa.me/sms:) and the masked callback-request
 relay never need a provider — they are free forever.
 
+**Step-by-step setup for every channel (Gmail, SendGrid, Meta WhatsApp
+Cloud API, Twilio, India DLT notes, troubleshooting):**
+[`docs/ACTIVATION_GUIDE.md`](./docs/ACTIVATION_GUIDE.md)
+
 ## Roadmap
 
 See [`docs/PRODUCT_ANALYSIS.md`](./docs/PRODUCT_ANALYSIS.md) for the full
