@@ -1,7 +1,7 @@
 /**
  * Settings sub-components.  Extracted from the 131-line SettingsPage.
  */
-import { Download, Trash2 } from "lucide-react";
+import { Download, MessageSquare, Phone, Trash2 } from "lucide-react";
 
 import {
     AlertDialog,
@@ -48,6 +48,53 @@ export function ProfileSection({ me, setMe, save, t }) {
                     />
                 </div>
             </div>
+        </section>
+    );
+}
+
+export function ContactSection({ me, setMe, save, t }) {
+    return (
+        <section className="surface p-6 space-y-3">
+            <h2 className="font-display text-lg font-bold">{t("settings.contact")}</h2>
+            <div className="space-y-1.5">
+                <Label>{t("settings.phone_label")}</Label>
+                <Input
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={me.phone || ""}
+                    onChange={(e) => setMe({ ...me, phone: e.target.value })}
+                    onBlur={() => save({ phone: me.phone || "" })}
+                    data-testid="settings-phone"
+                />
+                <p className="text-xs text-muted-foreground">{t("settings.phone_help")}</p>
+            </div>
+            <Row
+                label={
+                    <span className="inline-flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4 text-emerald-500" /> {t("settings.whatsapp_alerts")}
+                    </span>
+                }
+            >
+                <Switch
+                    checked={!!me.whatsapp_alerts}
+                    onCheckedChange={(v) => save({ whatsapp_alerts: v })}
+                    data-testid="whatsapp-alerts-switch"
+                />
+            </Row>
+            <Row
+                label={
+                    <span className="inline-flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-sky-500" /> {t("settings.sms_alerts")}
+                    </span>
+                }
+            >
+                <Switch
+                    checked={!!me.sms_alerts}
+                    onCheckedChange={(v) => save({ sms_alerts: v })}
+                    data-testid="sms-alerts-switch"
+                />
+            </Row>
+            <p className="text-xs text-muted-foreground">{t("settings.alerts_note")}</p>
         </section>
     );
 }

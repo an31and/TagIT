@@ -18,10 +18,12 @@ import { toast } from "sonner";
 
 import {
     TagBasicSection,
+    TagContactSection,
     TagDataSection,
     TagPublicFieldsSection,
 } from "../components/tag-edit/TagSections";
 import api, { formatApiError } from "../lib/api";
+import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/i18n";
 
 const TYPE_FIELDS = {
@@ -49,6 +51,12 @@ const EMPTY_TAG = {
         pet_breed: true,
         note: true,
     },
+    contact: {
+        mode: "masked",
+        show_call: true,
+        show_whatsapp: true,
+        show_sms: true,
+    },
     status: "active",
 };
 
@@ -56,6 +64,7 @@ export default function TagEditPage() {
     const { id } = useParams();
     const isNew = !id || id === "new";
     const { t } = useI18n();
+    const { user } = useAuth();
     const navigate = useNavigate();
 
     const [tag, setTag] = useState(isNew ? EMPTY_TAG : null);
@@ -103,6 +112,7 @@ export default function TagEditPage() {
                 message: tag.message,
                 data: tag.data,
                 public_fields: tag.public_fields,
+                contact: tag.contact,
             };
             const savedTag = isNew
                 ? (await api.post("/tags", { type: tag.type, ...payload })).data
@@ -150,6 +160,7 @@ export default function TagEditPage() {
             </div>
 
             <TagBasicSection tag={tag} set={set} isNew={isNew} t={t} />
+            <TagContactSection tag={tag} set={set} t={t} hasPhone={!!user?.phone} />
             <TagDataSection tag={tag} set={set} fields={typeFields} t={t} />
             <TagPublicFieldsSection tag={tag} set={set} t={t} />
 

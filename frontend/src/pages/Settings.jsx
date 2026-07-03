@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import {
+    ContactSection,
     DataPrivacySection,
     LanguageSection,
     NotificationsSection,
@@ -65,6 +66,7 @@ export default function SettingsPage() {
         <div className="max-w-3xl mx-auto space-y-6" data-testid="settings-root">
             <h1 className="font-display text-3xl font-black tracking-tight">{t("settings.title")}</h1>
             <ProfileSection me={me} setMe={setMe} save={save} t={t} />
+            <ContactSection me={me} setMe={setMe} save={save} t={t} />
             <NotificationsSection me={me} save={save} t={t} />
             <LanguageSection lang={lang} setLang={setLang} langs={langs} save={save} t={t} />
             <DataPrivacySection onExport={onExport} onDelete={onDelete} t={t} />

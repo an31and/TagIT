@@ -18,6 +18,15 @@ numbers, or charge a subscription. InfoTag does none of those.
 - **PWA for owners.** Installable on Android/iOS via the web manifest.
 - **Privacy-first.** Owner's phone number is never exposed; messages route
   via server-side relays. IPs are hashed.
+- **Masked or direct contact — per tag.** Competitors sell separate "mask
+  calling" and "direct calling" products; InfoTag makes it a free toggle.
+  *Masked* (default): finders message you or request a call back — your
+  number never appears; an optional Twilio bridge hides both numbers.
+  *Direct*: finders get one-tap Call / WhatsApp / SMS buttons (free deep
+  links, no telephony provider needed).
+- **Multi-channel alerts.** Finder actions fan out to email (free),
+  WhatsApp (Meta Cloud API free tier) and SMS (Twilio) — each env-gated
+  and off until configured.
 - **Medical IDs with consent.** Wrong medical data is dangerous, so accuracy
   is a first-class concern: explicit consent + last-updated date.
 - **Free and open-source (MIT).** Made in India 🇮🇳.
@@ -40,8 +49,10 @@ numbers, or charge a subscription. InfoTag does none of those.
 - **Frontend**: React + Tailwind + shadcn/ui, configured as a PWA.
 - **Database**: MongoDB. Collections: `users`, `tags`, `profiles`,
   `scans`, `messages`, `sponsors`, `login_attempts`.
-- **Email/WhatsApp/Twilio**: optional, env-gated. Skipped silently if not
-  configured; advanced-tier endpoints exist as placeholders.
+- **Email/WhatsApp/Twilio**: optional, env-gated, fully implemented —
+  email via SendGrid/SMTP, WhatsApp via the Meta Cloud API, SMS and the
+  two-way masked-call bridge via Twilio. All skipped silently when not
+  configured.
 
 ## Run locally (one command)
 
@@ -89,6 +100,8 @@ yarn start
 | GET    | `/api/tags/{id}/pdf?layout=a4_stickers` | cookie JWT | Sticker PDF (a4_stickers/id_card/keyring)|
 | GET    | `/api/public/tags/{slug}`               | none       | Finder view + records a scan             |
 | POST   | `/api/public/tags/{slug}/messages`      | none       | Finder → owner anonymous message         |
+| POST   | `/api/public/tags/{slug}/call-request`  | none       | Masked call-back request (free relay)    |
+| POST   | `/api/public/tags/{slug}/masked-call`   | none       | Two-way masked call bridge (Twilio-gated)|
 | POST   | `/api/sponsors`                         | none       | Pledge to sponsor printed stickers       |
 
 Full reference: `http://localhost:8001/docs`.
@@ -123,19 +136,40 @@ Full reference: `http://localhost:8001/docs`.
 └── README.md
 ```
 
+## Alert / contact providers (all optional)
+
+The app runs fully with **zero** providers configured — email, WhatsApp and
+SMS alerts each switch on when their env vars appear:
+
+| Channel | Env vars | Cost |
+|---|---|---|
+| Email | `SENDGRID_API_KEY` *or* `SMTP_HOST`+`SMTP_USER`(+`SMTP_PASS`,`SMTP_PORT`,`EMAIL_FROM`) | free |
+| WhatsApp | `WHATSAPP_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID` (Meta Cloud API) | free service tier |
+| SMS + masked calls | `TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` + `TWILIO_FROM_NUMBER` | paid, env-gated |
+
+Direct-mode contact buttons (tel:/wa.me/sms:) and the masked callback-request
+relay never need a provider — they are free forever.
+
 ## Roadmap
 
-- Real WhatsApp notifications (BSP integration) behind a paid-tier flag.
-- Twilio masked-calling for the "Call owner" action.
-- Server-side render the Finder page to hit the <75 KB 3G budget.
+See [`docs/PRODUCT_ANALYSIS.md`](./docs/PRODUCT_ANALYSIS.md) for the full
+competitive analysis (GetBackLost, EkTag, Sampark, LetzScan, LostIt) and the
+ranked roadmap. Highlights:
+
+- Phone verification (OTP) before a tag can switch to direct mode.
+- Web Push scan alerts through the existing PWA service worker.
+- Lost-mode poster generator + reward flag on the finder page.
+- Community found-map, bulk/organisation tags, NFC write support.
 - Native React Native wrapper that reuses the FastAPI backend.
 
 ## License
 
 MIT — see [`LICENSE`](./LICENSE). 
 
-## Maintainer
+## Team
 
-**Anand Lakhera** — an.31and@gmail.com · +91 89042 23100  
+**Founder — Anand Lakhera** — an.31and@gmail.com · +91 89042 23100  
+**Co-Founder — Devesh Sen**
+
 Want to sponsor a batch of free physical stickers? Use the form on the
 landing page or email directly. 🇮🇳

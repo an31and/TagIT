@@ -15,9 +15,16 @@ from fastapi import FastAPI  # noqa: E402
 from starlette.middleware.cors import CORSMiddleware  # noqa: E402
 
 from db import close_db, ensure_indexes, get_db, seed_admin_and_demo  # noqa: E402
-from notifications import email_enabled, twilio_enabled, whatsapp_enabled  # noqa: E402
+from notifications import (  # noqa: E402
+    email_enabled,
+    masked_call_enabled,
+    sms_enabled,
+    twilio_enabled,
+    whatsapp_enabled,
+)
 from routes.admin_routes import router as admin_router  # noqa: E402
 from routes.auth_routes import router as auth_router  # noqa: E402
+from routes.contact_routes import router as contact_router  # noqa: E402
 from routes.finder_ssr import router as finder_ssr_router  # noqa: E402
 from routes.message_routes import router as message_router  # noqa: E402
 from routes.pdf_routes import router as pdf_router  # noqa: E402
@@ -69,6 +76,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(contact_router)
 app.include_router(public_router)
 app.include_router(tag_router)
 app.include_router(profile_router)
@@ -90,18 +98,20 @@ async def health() -> dict:
 
 @app.get("/api/features")
 async def features() -> dict:
-    return {"email": email_enabled(), "whatsapp": whatsapp_enabled(), "twilio_masked_calls": twilio_enabled(), "made_in_india": True}
+    """Which alert/contact channels this deployment has configured.
 
-
-@app.post("/api/integrations/whatsapp/notify")
-async def whatsapp_notify_placeholder() -> dict:
-    if not whatsapp_enabled():
-        return {"ok": False, "reason": "WhatsApp notifications are a paid feature — configure WHATSAPP_API_KEY"}
-    return {"ok": True, "note": "Wired placeholder — implement provider call here."}
-
-
-@app.post("/api/integrations/twilio/connect-call")
-async def twilio_connect_call_placeholder() -> dict:
-    if not twilio_enabled():
-        return {"ok": False, "reason": "Masked calling is a paid feature — configure TWILIO_ACCOUNT_SID / TWILIO_AUTH_TOKEN"}
-    return {"ok": True, "note": "Wired placeholder — implement masked-call flow here."}
+    Everything degrades gracefully: with zero providers configured the app
+    still works (email off, WhatsApp/SMS off, masked calls fall back to the
+    free callback-request relay; direct-mode tags use tel:/sms:/wa.me deep
+    links which never need a provider).
+    """
+    return {
+        "email": email_enabled(),
+        "whatsapp": whatsapp_enabled(),
+        "sms": sms_enabled(),
+        "twilio": twilio_enabled(),
+        "masked_calls": masked_call_enabled(),
+        "callback_relay": True,  # always free
+        "direct_deep_links": True,  # always free
+        "made_in_india": True,
+    }

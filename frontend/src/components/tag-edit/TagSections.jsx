@@ -2,6 +2,8 @@
  * TagEdit sub-components.  Extracted from the original 234-line page so
  * each section is independently understandable + testable.
  */
+import { MessageCircle, MessageSquare, Phone, ShieldCheck } from "lucide-react";
+
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -85,6 +87,65 @@ export function TagDataSection({ tag, set, fields, t }) {
                     />
                 </Field>
             ))}
+        </Section>
+    );
+}
+
+export function TagContactSection({ tag, set, t, hasPhone }) {
+    const contact = tag.contact || { mode: "masked", show_call: true, show_whatsapp: true, show_sms: true };
+    const setContact = (key, value) => set("contact", { ...contact, [key]: value });
+    const isDirect = contact.mode === "direct";
+
+    const modeCard = (mode, title, desc, Icon) => (
+        <button
+            type="button"
+            onClick={() => setContact("mode", mode)}
+            className={`text-left p-4 rounded-lg border-2 transition-colors ${
+                contact.mode === mode ? "border-accent bg-accent/5" : "border-border hover:border-accent/40"
+            }`}
+            data-testid={`contact-mode-${mode}`}
+        >
+            <div className="flex items-center gap-2 font-semibold">
+                <Icon className={`h-4 w-4 ${mode === "masked" ? "text-emerald-500" : "text-accent"}`} />
+                {title}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{desc}</p>
+        </button>
+    );
+
+    const channels = [
+        { key: "show_call", label: t("tag_edit.contact_show_call"), Icon: Phone },
+        { key: "show_whatsapp", label: t("tag_edit.contact_show_whatsapp"), Icon: MessageCircle },
+        { key: "show_sms", label: t("tag_edit.contact_show_sms"), Icon: MessageSquare },
+    ];
+
+    return (
+        <Section title={t("tag_edit.section_contact")}>
+            <div className="grid sm:grid-cols-2 gap-3">
+                {modeCard("masked", t("tag_edit.contact_mode_masked"), t("tag_edit.contact_mode_masked_desc"), ShieldCheck)}
+                {modeCard("direct", t("tag_edit.contact_mode_direct"), t("tag_edit.contact_mode_direct_desc"), Phone)}
+            </div>
+            {isDirect && !hasPhone && (
+                <p className="text-sm text-amber-600 dark:text-amber-400" data-testid="contact-needs-phone">
+                    {t("tag_edit.contact_needs_phone")}
+                </p>
+            )}
+            {isDirect && (
+                <div className="grid sm:grid-cols-3 gap-3">
+                    {channels.map(({ key, label, Icon }) => (
+                        <label key={key} className="flex items-center justify-between p-3 rounded-md border gap-2">
+                            <span className="text-sm inline-flex items-center gap-2">
+                                <Icon className="h-4 w-4 text-muted-foreground" /> {label}
+                            </span>
+                            <Switch
+                                checked={!!contact[key]}
+                                onCheckedChange={(v) => setContact(key, v)}
+                                data-testid={`contact-${key}`}
+                            />
+                        </label>
+                    ))}
+                </div>
+            )}
         </Section>
     );
 }

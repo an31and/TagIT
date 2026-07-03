@@ -7,6 +7,7 @@ people recover lost items (vehicles, pets, luggage, keys) and let first
 responders read critical medical info in seconds — free of cost.
 
 Founder & owner: Anand Lakhera — +91 89042 23100 · an.31and@gmail.com
+Co-Founder: Devesh Sen
 
 ## Architecture
 - **Backend** — FastAPI + Motor (async MongoDB) on port 8001.  All routes under
@@ -60,6 +61,25 @@ Founder & owner: Anand Lakhera — +91 89042 23100 · an.31and@gmail.com
   root + per-folder READMEs, standalone seed.py.
 - Testing: 33/33 backend pytest pass on iteration_1; iteration_2 verified
   the full backlog with new feature tests.
+
+## What's been implemented (2026-07-03)
+- **Mask / no-mask contact model** — per-tag `contact` block
+  (`mode: masked|direct` + per-channel toggles).  Masked (default): finder
+  page never contains the owner's number; callback-request relay
+  (`POST /api/public/tags/{slug}/call-request`, free) + optional Twilio
+  masked-call bridge (`POST /api/public/tags/{slug}/masked-call`,
+  env-gated).  Direct: SSR finder page renders free tel:/wa.me/sms: deep
+  links honoring per-channel toggles.
+- **Multi-channel owner alerts** — `notify_owner()` fan-out: email +
+  WhatsApp (Meta Cloud API: `WHATSAPP_TOKEN`+`WHATSAPP_PHONE_NUMBER_ID`) +
+  SMS (Twilio: SID/token/`TWILIO_FROM_NUMBER`).  User model gains `phone`,
+  `whatsapp_alerts`, `sms_alerts`; Settings → "Phone & alerts" UI.
+- **Animated landing page** — interactive UseCaseShowcase (wrong parking /
+  masked call / lost & found / medical ID scenes) with pure-CSS keyframes
+  (scan-sweep, phone-ring, travel-dot, heartbeat…), all disabled under
+  prefers-reduced-motion.  Hero tag list staggers in.
+- **Docs** — `docs/PRODUCT_ANALYSIS.md`: competitor analysis (GetBackLost,
+  EkTag, Sampark/NGF132, LetzScan, LostIt) + ranked free-first roadmap.
 
 ## Backlog / Next actions
 - **P1** Skeletons on dashboard stat tiles instead of the em-dash placeholder.

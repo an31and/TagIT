@@ -92,6 +92,29 @@ const dict = {
                 "When someone scans, you get a message. Their location too — if they share it.",
             tag_for_everything: "A tag for every thing",
             how_it_works: "How it works",
+            use_cases_title: "See InfoTag in action",
+            use_cases_subtitle:
+                "Four everyday rescues — pick a scene to see how a scan turns a stranger into a helper.",
+            usecase_parking: "Wrong parking",
+            usecase_parking_title: "Your scooter is blocking a gate",
+            usecase_parking_desc:
+                "A passer-by scans the QR on your vehicle and taps one button — \"Vehicle parked incorrectly\". Your phone buzzes with an email, WhatsApp or SMS alert before the tow truck arrives.",
+            usecase_parking_privacy: "Your number is never shown to the scanner.",
+            usecase_callback: "Masked call",
+            usecase_callback_title: "Talk without revealing your number",
+            usecase_callback_desc:
+                "In masked mode, the finder leaves their number and you call them back — or, with masked calling enabled, InfoTag bridges the call so neither side ever sees the other's number. Prefer zero friction? Switch a tag to direct mode and finders get one-tap Call / WhatsApp / SMS buttons.",
+            usecase_callback_privacy: "You choose per tag: masked relay or direct contact.",
+            usecase_found: "Lost & found",
+            usecase_found_title: "Your luggage took its own trip",
+            usecase_found_desc:
+                "A kind stranger scans the tag on your bag, taps \"I found this\", and shares their approximate location. You get the message, the map pin, and their contact — and your bag comes home.",
+            usecase_found_privacy: "Finders never need an app or an account.",
+            usecase_medical: "Medical ID",
+            usecase_medical_title: "Seconds matter in an emergency",
+            usecase_medical_desc:
+                "A first responder scans your Medical ID and instantly sees your blood group, allergies and emergency contact — with a one-tap call button. Shown only with your explicit consent.",
+            usecase_medical_privacy: "You control exactly what responders see.",
         },
         auth: {
             sign_in_title: "Welcome back",
@@ -164,6 +187,18 @@ const dict = {
             delete_warning:
                 "This permanently deletes the tag, its scans and finder messages.",
             confirm_delete: "Yes, delete this tag",
+            section_contact: "How can finders reach you?",
+            contact_mode_masked: "Masked (recommended)",
+            contact_mode_masked_desc:
+                "Your number stays hidden. Finders message you or request a call back through InfoTag.",
+            contact_mode_direct: "Direct",
+            contact_mode_direct_desc:
+                "Finders see one-tap Call / WhatsApp / SMS buttons with your number. Fastest, zero cost — but your number is visible.",
+            contact_show_call: "Call button",
+            contact_show_whatsapp: "WhatsApp button",
+            contact_show_sms: "SMS button",
+            contact_needs_phone:
+                "Add your phone number in Settings → Phone & alerts to use direct mode.",
         },
         qr: {
             title: "QR & stickers",
@@ -210,6 +245,14 @@ const dict = {
             notify_on_message: "Email me when a finder sends a message",
             notify_on_scan: "Email me every time a tag is scanned",
             saved: "Saved",
+            contact: "Phone & alerts",
+            phone_label: "Your phone number",
+            phone_help:
+                "Used for WhatsApp/SMS alerts and for tags you switch to direct-contact mode. Include the country code, e.g. +91…",
+            whatsapp_alerts: "WhatsApp me finder alerts",
+            sms_alerts: "SMS me finder alerts",
+            alerts_note:
+                "WhatsApp and SMS alerts also require the server to have a provider configured — email alerts always work.",
         },
         claim: {
             title: "Claim this tag",
@@ -311,6 +354,29 @@ const dict = {
                 "जब कोई स्कैन करता है, आपको संदेश मिलता है। चाहें तो लोकेशन भी।",
             tag_for_everything: "हर चीज़ के लिए एक टैग",
             how_it_works: "यह कैसे काम करता है",
+            use_cases_title: "InfoTag को काम करते देखें",
+            use_cases_subtitle:
+                "रोज़मर्रा की चार कहानियाँ — देखें कि एक स्कैन कैसे अजनबी को मददगार बना देता है।",
+            usecase_parking: "ग़लत पार्किंग",
+            usecase_parking_title: "आपका स्कूटर गेट रोक रहा है",
+            usecase_parking_desc:
+                "कोई राहगीर आपके वाहन का QR स्कैन करके एक बटन दबाता है — और आपके फ़ोन पर ईमेल, WhatsApp या SMS से तुरंत सूचना पहुँच जाती है।",
+            usecase_parking_privacy: "स्कैन करने वाले को आपका नंबर कभी नहीं दिखता।",
+            usecase_callback: "मास्क्ड कॉल",
+            usecase_callback_title: "नंबर बताए बिना बात करें",
+            usecase_callback_desc:
+                "मास्क्ड मोड में खोजने वाला अपना नंबर छोड़ता है और आप कॉल-बैक करते हैं — या मास्क्ड कॉलिंग से दोनों नंबर छिपे रहते हैं। चाहें तो टैग को डायरेक्ट मोड पर रखें — फिर Call / WhatsApp / SMS बटन एक टैप पर।",
+            usecase_callback_privacy: "हर टैग के लिए आप चुनते हैं: मास्क्ड या डायरेक्ट।",
+            usecase_found: "खोया-पाया",
+            usecase_found_title: "आपका सामान अपनी यात्रा पर निकल गया",
+            usecase_found_desc:
+                "कोई भला इंसान टैग स्कैन करके \"यह मुझे मिला\" दबाता है और अपनी लोकेशन साझा करता है। आपको संदेश, नक्शे का पिन और संपर्क मिल जाता है।",
+            usecase_found_privacy: "खोजने वाले को न ऐप चाहिए, न अकाउंट।",
+            usecase_medical: "मेडिकल आईडी",
+            usecase_medical_title: "इमरजेंसी में सेकंड मायने रखते हैं",
+            usecase_medical_desc:
+                "फ़र्स्ट रिस्पॉन्डर स्कैन करते ही ब्लड ग्रुप, एलर्जी और इमरजेंसी संपर्क देखता है — एक-टैप कॉल बटन के साथ। सिर्फ़ आपकी सहमति से।",
+            usecase_medical_privacy: "रिस्पॉन्डर क्या देखें, यह आप तय करते हैं।",
         },
         auth: {
             sign_in_title: "वापस स्वागत है",

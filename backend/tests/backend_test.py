@@ -56,24 +56,61 @@ class TestHealth:
     def test_features(self):
         r = requests.get(f"{BASE_URL}/api/features")
         assert r.status_code == 200
-        assert r.json()["made_in_india"] is True
+        data = r.json()
+        assert data["made_in_india"] is True
+        # The free contact paths are always available, provider or not.
+        assert data["callback_relay"] is True
+        assert data["direct_deep_links"] is True
+        # No providers configured on the test deployment.
+        assert data["sms"] is False
+        assert data["masked_calls"] is False
 
 
-# ---------- 2. Integration placeholders ----------
-class TestIntegrationPlaceholders:
-    def test_whatsapp_notify_not_configured(self):
-        r = requests.post(f"{BASE_URL}/api/integrations/whatsapp/notify")
+# ---------- 2. Contact endpoints (masked / direct) ----------
+class TestContactEndpoints:
+    @pytest.fixture(scope="class")
+    def tag_slug(self, admin_session):
+        r = admin_session.post(f"{BASE_URL}/api/tags", json={
+            "type": "vehicle", "label": "Contact test", "display_name": "Contact Test Car",
+        })
+        assert r.status_code == 200, r.text
+        tag = r.json()
+        assert tag["contact"]["mode"] == "masked"  # privacy-first default
+        yield tag["slug"]
+        admin_session.delete(f"{BASE_URL}/api/tags/{tag['id']}")
+
+    def test_finder_view_masked_contact(self, tag_slug):
+        r = requests.get(f"{BASE_URL}/api/public/tags/{tag_slug}")
+        assert r.status_code == 200
+        contact = r.json()["contact"]
+        assert contact["mode"] == "masked"
+        assert contact["callback"] is True
+        assert "phone" not in contact  # the owner's number is never exposed
+
+    def test_callback_request(self, tag_slug):
+        r = requests.post(
+            f"{BASE_URL}/api/public/tags/{tag_slug}/call-request",
+            json={"finder_phone": "+919999900001", "finder_name": "Kind Finder"},
+        )
+        assert r.status_code == 200
+        assert r.json()["ok"] is True
+
+    def test_masked_call_falls_back_when_unconfigured(self, tag_slug):
+        r = requests.post(
+            f"{BASE_URL}/api/public/tags/{tag_slug}/masked-call",
+            json={"finder_phone": "+919999900002"},
+        )
         assert r.status_code == 200
         body = r.json()
         assert body["ok"] is False
-        assert "WHATSAPP" in body["reason"].upper() or "whatsapp" in body["reason"].lower()
+        assert body["fallback"] == "callback"
 
-    def test_twilio_connect_call_not_configured(self):
-        r = requests.post(f"{BASE_URL}/api/integrations/twilio/connect-call")
-        assert r.status_code == 200
-        body = r.json()
-        assert body["ok"] is False
-        assert "TWILIO" in body["reason"].upper() or "twilio" in body["reason"].lower()
+    def test_callback_request_rejects_bad_phone(self, tag_slug):
+        r = requests.post(
+            f"{BASE_URL}/api/public/tags/{tag_slug}/call-request",
+            json={"finder_phone": "123", "finder_name": ""},
+        )
+        assert r.status_code == 422  # model enforces min_length=8
 
 
 # ---------- 3. Auth flows ----------

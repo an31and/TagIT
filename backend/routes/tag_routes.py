@@ -13,12 +13,14 @@ from fastapi.responses import StreamingResponse
 from auth import generate_slug, get_current_user, hash_ip
 from db import get_db
 from models import (
+    DEFAULT_CONTACT,
     DEFAULT_PUBLIC_FIELDS,
     FinderView,
     TagCreatePayload,
     TagOut,
     TagUpdatePayload,
 )
+from notifications import masked_call_enabled
 
 router = APIRouter(prefix="/api", tags=["tags"])
 
@@ -43,6 +45,7 @@ def _tag_doc_to_out(doc: dict) -> dict:
         "status": doc.get("status", "active"),
         "data": doc.get("data", {}),
         "public_fields": doc.get("public_fields", dict(DEFAULT_PUBLIC_FIELDS)),
+        "contact": doc.get("contact", dict(DEFAULT_CONTACT)),
         "created_at": doc.get("created_at"),
         "updated_at": doc.get("updated_at"),
     }
@@ -77,6 +80,7 @@ async def create_tag(payload: TagCreatePayload, user: dict = Depends(_current_us
         "status": "active",
         "data": payload.data,
         "public_fields": payload.public_fields or dict(DEFAULT_PUBLIC_FIELDS),
+        "contact": payload.contact.model_dump(),
         "created_at": now,
         "updated_at": now,
     }
@@ -170,6 +174,37 @@ def _public_data(doc: dict) -> dict:
     return out
 
 
+async def build_contact_block(db, doc: dict) -> dict | None:
+    """What may the finder use to reach the owner?
+
+    direct → expose the owner's phone with the channels the owner enabled
+             (free: tel:/sms:/wa.me deep links, no telephony provider).
+    masked → never expose the phone; offer the relay callback request and,
+             when Twilio is configured, the two-way masked-call bridge.
+    """
+    contact = doc.get("contact") or dict(DEFAULT_CONTACT)
+    if not doc.get("owner_id"):
+        return None
+    if contact.get("mode") == "direct":
+        owner = await db.users.find_one({"id": doc["owner_id"]}, {"_id": 0, "phone": 1})
+        phone = (owner or {}).get("phone", "")
+        if not phone:
+            # Direct mode without a phone on file degrades to masked relay.
+            return {"mode": "masked", "callback": True, "masked_call": masked_call_enabled()}
+        return {
+            "mode": "direct",
+            "phone": phone,
+            "call": bool(contact.get("show_call", True)),
+            "whatsapp": bool(contact.get("show_whatsapp", True)),
+            "sms": bool(contact.get("show_sms", True)),
+        }
+    return {
+        "mode": "masked",
+        "callback": bool(contact.get("show_call", True)),
+        "masked_call": masked_call_enabled() and bool(contact.get("show_call", True)),
+    }
+
+
 @router.get("/public/tags/{slug}", response_model=FinderView)
 async def get_public_tag(slug: str, request: Request) -> dict:
     db = get_db()
@@ -230,6 +265,7 @@ async def get_public_tag(slug: str, request: Request) -> dict:
         "message": doc.get("message", "") if public_fields.get("message", True) else "",
         "public_data": _public_data(doc),
         "is_unclaimed": doc.get("owner_id") is None,
+        "contact": await build_contact_block(db, doc),
         "emergency": emergency,
     }
 
