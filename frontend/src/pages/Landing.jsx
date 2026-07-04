@@ -329,11 +329,11 @@ export default function LandingPage() {
                             <ul className="space-y-2 text-sm">
                                 <li className="flex items-center gap-1.5" data-testid="footer-founder">
                                     <Cloud className="h-3.5 w-3.5 text-accent shrink-0" />
-                                    Founder: <span className="text-white font-semibold">Anand Lakhera</span>
+                                    Founder: <span className="text-white font-semibold">Anand Lakhera (Cloud FinOps Engineer & DevOps Consultant)</span>
                                 </li>
                                 <li className="flex items-center gap-1.5" data-testid="footer-cofounder">
                                     <Users className="h-3.5 w-3.5 text-accent shrink-0" />
-                                    Co-Founder: <span className="text-white font-semibold">Devesh Sen</span>
+                                    Co-Founder: <span className="text-white font-semibold">Devesh Sen (Engineer & Social Activist)</span>
                                 </li>
                                 <li className="flex items-center gap-1.5" data-testid="footer-phone">
                                     <Phone className="h-3.5 w-3.5 text-accent shrink-0" />
@@ -341,7 +341,7 @@ export default function LandingPage() {
                                 </li>
                                 <li className="flex items-center gap-1.5" data-testid="footer-contact">
                                     <Mail className="h-3.5 w-3.5 text-accent shrink-0" />
-                                    <a href="mailto:an.31and@gmail.com" className="hover:text-white">an.31and@gmail.com</a>
+                                    <a href="mailto:anandlakhera@info-tag.in" className="hover:text-white">anandlakhera@info-tag.in</a>
                                 </li>
                                 <li className="flex items-center gap-1.5">
                                     <MessageCircle className="h-3.5 w-3.5 text-accent shrink-0" />
