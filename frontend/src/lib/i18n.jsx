@@ -407,6 +407,11 @@ const dict = {
             phone_help:
                 "Used for WhatsApp/SMS alerts and for tags you switch to direct-contact mode. Include the country code, e.g. +91…",
             whatsapp_alerts: "WhatsApp me finder alerts",
+            whatsapp_activate_help:
+                "WhatsApp only lets us message you for free after you've messaged us first — one tap starts a free 24-hour window.",
+            whatsapp_activate_cta: "Message us to activate instant alerts",
+            whatsapp_window_active: "WhatsApp alerts are active until",
+            whatsapp_window_expired: "Your WhatsApp window has closed — tap above to reactivate free alerts",
             sms_alerts: "SMS me finder alerts",
             alerts_note:
                 "WhatsApp and SMS alerts also require the server to have a provider configured — email alerts always work.",

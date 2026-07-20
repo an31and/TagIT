@@ -43,6 +43,7 @@ def _to_public_user(doc: dict) -> dict:
         "notify_on_scan": doc.get("notify_on_scan", False),
         "whatsapp_alerts": doc.get("whatsapp_alerts", False),
         "sms_alerts": doc.get("sms_alerts", False),
+        "whatsapp_window_opens_at": doc.get("whatsapp_window_opens_at"),
         "locale": doc.get("locale", "en"),
         "auth_provider": doc.get("auth_provider", "password"),
         "role": doc.get("role", "user"),

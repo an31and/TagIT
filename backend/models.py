@@ -44,6 +44,10 @@ class UserPublic(BaseModel):
     notify_on_scan: bool = False
     whatsapp_alerts: bool = False  # fan-out finder alerts to WhatsApp (env-gated)
     sms_alerts: bool = False  # fan-out finder alerts to SMS (env-gated)
+    # Set by the WhatsApp webhook when the owner messages the business
+    # number — that opens Meta's free 24h "customer service window".
+    # System-managed only; never accepted from UpdateUserPayload.
+    whatsapp_window_opens_at: Optional[str] = None
     locale: str = "en"
     auth_provider: str = "password"  # password | google | both
     role: str = "user"  # user | admin

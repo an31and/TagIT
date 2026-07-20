@@ -57,6 +57,24 @@ export function ProfileSection({ me, setMe, save, t }) {
 }
 
 export function ContactSection({ me, setMe, save, t }) {
+    const [features, setFeatures] = useState(null);
+
+    useEffect(() => {
+        api.get("/features")
+            .then(({ data }) => setFeatures(data))
+            .catch(() => setFeatures({}));
+    }, []);
+
+    const businessDigits = (features?.whatsapp_business_number || "").replace(/\D/g, "");
+    const showActivate = !!me.whatsapp_alerts && !!features?.whatsapp && !!businessDigits;
+    const waLink = businessDigits
+        ? `https://wa.me/${businessDigits}?text=${encodeURIComponent("Hi InfoTag, activate my alerts")}`
+        : "";
+
+    const windowOpensAt = me.whatsapp_window_opens_at ? new Date(me.whatsapp_window_opens_at) : null;
+    const windowExpiresAt = windowOpensAt ? new Date(windowOpensAt.getTime() + 24 * 60 * 60 * 1000) : null;
+    const windowActive = !!windowExpiresAt && windowExpiresAt.getTime() > Date.now();
+
     return (
         <section className="surface p-6 space-y-3">
             <h2 className="font-display text-lg font-bold">{t("settings.contact")}</h2>
@@ -85,6 +103,27 @@ export function ContactSection({ me, setMe, save, t }) {
                     data-testid="whatsapp-alerts-switch"
                 />
             </Row>
+            {showActivate && (
+                <div className="rounded-md border p-3 space-y-1.5" data-testid="whatsapp-activate-block">
+                    <p className="text-xs text-muted-foreground">{t("settings.whatsapp_activate_help")}</p>
+                    <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:underline"
+                        data-testid="whatsapp-activate-link"
+                    >
+                        <MessageSquare className="h-4 w-4" /> {t("settings.whatsapp_activate_cta")}
+                    </a>
+                    {windowOpensAt && (
+                        <p className={`text-xs ${windowActive ? "text-emerald-600" : "text-amber-600"}`} data-testid="whatsapp-window-status">
+                            {windowActive
+                                ? `${t("settings.whatsapp_window_active")} ${windowExpiresAt.toLocaleString()}`
+                                : t("settings.whatsapp_window_expired")}
+                        </p>
+                    )}
+                </div>
+            )}
             <Row
                 label={
                     <span className="inline-flex items-center gap-2">

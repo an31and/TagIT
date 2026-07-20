@@ -83,6 +83,19 @@ def _clean_phone(phone: str | None) -> str:
     return cleaned
 
 
+def phone_last_digits(phone: str | None, n: int = 10) -> str:
+    """Last N digits of a phone number, ignoring +, spaces, dashes.
+
+    Used to match an inbound WhatsApp wa_id (always plain digits, e.g.
+    "919876543210") against however a user happened to type their number
+    in Settings (e.g. "+91 98765 43210"). Comparing only the last 10
+    digits sidesteps country-code formatting differences without needing
+    every stored phone number to be normalised on write.
+    """
+    digits = re.sub(r"\D", "", phone or "")
+    return digits[-n:] if digits else ""
+
+
 # ---------------------------------------------------------------------------
 # WhatsApp — Meta WhatsApp Cloud API (free service-conversation tier)
 # Env: WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID
@@ -91,6 +104,17 @@ def _clean_phone(phone: str | None) -> str:
 def whatsapp_enabled() -> bool:
     token = os.environ.get("WHATSAPP_TOKEN") or os.environ.get("WHATSAPP_API_KEY")
     return bool(token and os.environ.get("WHATSAPP_PHONE_NUMBER_ID"))
+
+
+def whatsapp_business_number() -> str:
+    """The dialable business number (E.164), for building wa.me opt-in links.
+
+    This is deliberately separate from WHATSAPP_PHONE_NUMBER_ID — that's an
+    opaque Graph API asset id, not a phone number, and isn't reversible to
+    one without an extra API call. Set WHATSAPP_BUSINESS_NUMBER once you've
+    registered a real number (e.g. "+919999999999").
+    """
+    return _clean_phone(os.environ.get("WHATSAPP_BUSINESS_NUMBER", ""))
 
 
 def send_whatsapp(to_phone: str, body: str) -> bool:

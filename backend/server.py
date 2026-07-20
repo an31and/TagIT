@@ -20,6 +20,7 @@ from notifications import (  # noqa: E402
     masked_call_enabled,
     sms_enabled,
     twilio_enabled,
+    whatsapp_business_number,
     whatsapp_enabled,
 )
 from routes.admin_routes import router as admin_router  # noqa: E402
@@ -34,6 +35,7 @@ from routes.profile_routes import router as profile_router  # noqa: E402
 from routes.public_routes import router as public_router  # noqa: E402
 from routes.sponsor_routes import router as sponsor_router  # noqa: E402
 from routes.tag_routes import router as tag_router  # noqa: E402
+from routes.webhook_routes import router as webhook_router  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -87,6 +89,7 @@ app.include_router(message_router)
 app.include_router(pdf_router)
 app.include_router(sponsor_router)
 app.include_router(finder_ssr_router)
+app.include_router(webhook_router)
 
 
 @app.get("/api")
@@ -111,6 +114,7 @@ async def features() -> dict:
     return {
         "email": email_enabled(),
         "whatsapp": whatsapp_enabled(),
+        "whatsapp_business_number": whatsapp_business_number() or None,
         "sms": sms_enabled(),
         "twilio": twilio_enabled(),
         "masked_calls": masked_call_enabled(),

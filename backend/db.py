@@ -33,6 +33,7 @@ async def close_db() -> None:
 async def ensure_indexes(db: AsyncIOMotorDatabase) -> None:
     await db.users.create_index("email", unique=True)
     await db.users.create_index("id", unique=True)
+    await db.users.create_index("phone")
     await db.tags.create_index("slug", unique=True)
     await db.tags.create_index("owner_id")
     await db.tags.create_index("id", unique=True)
