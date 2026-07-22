@@ -160,6 +160,72 @@ class TagOut(BaseModel):
     data: dict[str, Any]
     public_fields: dict[str, bool]
     contact: dict[str, Any] = Field(default_factory=lambda: dict(DEFAULT_CONTACT))
+    # Set only on tags minted as part of an organisation batch (bulk/event
+    # tags). `seq` is the 1-based running number within the batch.
+    batch_id: Optional[str] = None
+    seq: Optional[int] = None
+    created_at: str
+    updated_at: str
+
+
+# ---------------------------------------------------------------------------
+# Batches (bulk / event tags)
+# ---------------------------------------------------------------------------
+# An organisation — temple management, an NGO, an event/government body —
+# mints many tags at once and hands them out as wristbands / ID cards.  Every
+# tag in a batch is owned by the issuing org, so finder messages, the relay
+# contact and scan analytics all route back to the org's "control room" with
+# zero extra plumbing.  `kind` captures who each tag identifies.
+BatchKind = Literal["individual", "group", "family"]
+BatchStatus = Literal["active", "archived"]
+
+# Synchronous per-request generation cap.  Larger print runs use the CSV
+# manifest export (seq, slug, finder URL) handed to a printing vendor.
+MAX_BATCH_TAGS = 5000
+
+
+class BatchCreatePayload(BaseModel):
+    name: str = Field(min_length=1, max_length=120)  # e.g. "Kumbh Mela 2026"
+    org_name: str = Field(default="", max_length=120)
+    kind: BatchKind = "individual"
+    tag_type: TagType = "general"
+    count: int = Field(ge=1, le=MAX_BATCH_TAGS)
+    message: str = Field(default="", max_length=500)
+    note: str = Field(default="", max_length=500)
+    starts_on: str = ""  # free-form / ISO date; shown to organisers only
+    ends_on: str = ""
+    contact: TagContact = Field(default_factory=TagContact)
+    public_fields: Optional[dict[str, bool]] = None
+
+
+class BatchUpdatePayload(BaseModel):
+    name: Optional[str] = Field(default=None, max_length=120)
+    org_name: Optional[str] = Field(default=None, max_length=120)
+    message: Optional[str] = Field(default=None, max_length=500)
+    note: Optional[str] = Field(default=None, max_length=500)
+    starts_on: Optional[str] = None
+    ends_on: Optional[str] = None
+    status: Optional[BatchStatus] = None
+
+
+class BatchOut(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    owner_id: str
+    name: str
+    org_name: str
+    kind: BatchKind
+    tag_type: TagType
+    message: str
+    note: str
+    starts_on: str
+    ends_on: str
+    status: BatchStatus
+    count: int
+    # Live analytics — computed on read, not stored.
+    scanned_count: int = 0
+    message_count: int = 0
     created_at: str
     updated_at: str
 

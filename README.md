@@ -54,6 +54,27 @@ numbers, or charge a subscription. Info-Tag does none of those.
   two-way masked-call bridge via Twilio. All skipped silently when not
   configured.
 
+## Bulk / event tags (organisations)
+
+Temple management, NGOs and event or government bodies can mint QR IDs **in
+bulk** and hand them out as wristbands or ID cards — for individuals, groups
+or families — across an *n*-day function. Every tag in a batch is owned by the
+issuing organisation, so a finder who scans a lost child's band reaches the
+org's **control room** through the same privacy-first relay (no app, no exposed
+numbers), and every scan rolls up under the batch.
+
+- **One call, many tags.** `POST /api/batches` generates up to 5,000 tags per
+  request with collision-safe 9-char slugs.
+- **Scale beyond that.** Export a **CSV manifest** (`seq, slug, finder_url`)
+  and hand it to a printing vendor for runs of millions — no synchronous
+  generation cap in the way.
+- **Print in-house.** Paginated A4 **QR sticker sheets** (12 distinct QRs per
+  page) via `GET /api/batches/{id}/qrs.pdf?start=&count=`.
+- **Live analytics.** Per-batch scan and message counts; batch tags stay out of
+  the personal dashboard so a large run never floods it.
+
+Manage it all under **Bulk tags** in the owner nav (`/batches`).
+
 ## Run locally (one command)
 
 ```bash
@@ -98,6 +119,10 @@ yarn start
 | POST   | `/api/tags`                             | cookie JWT | Create a tag                             |
 | GET    | `/api/tags/{id}/qr.png`                 | cookie JWT | QR PNG                                   |
 | GET    | `/api/tags/{id}/pdf?layout=a4_stickers` | cookie JWT | Sticker PDF (a4_stickers/id_card/keyring)|
+| POST   | `/api/batches`                          | cookie JWT | Bulk-mint N event/org tags in one call   |
+| GET    | `/api/batches`                          | cookie JWT | List batches + live scan counts          |
+| GET    | `/api/batches/{id}/manifest.csv`        | cookie JWT | Full QR manifest for a print vendor      |
+| GET    | `/api/batches/{id}/qrs.pdf`             | cookie JWT | Printable A4 QR sticker sheets           |
 | GET    | `/api/public/tags/{slug}`               | none       | Finder view + records a scan             |
 | POST   | `/api/public/tags/{slug}/messages`      | none       | Finder → owner anonymous message         |
 | POST   | `/api/public/tags/{slug}/call-request`  | none       | Masked call-back request (free relay)    |
@@ -164,7 +189,7 @@ ranked roadmap. Highlights:
 - Phone verification (OTP) before a tag can switch to direct mode.
 - Web Push scan alerts through the existing PWA service worker.
 - Lost-mode poster generator + reward flag on the finder page.
-- Community found-map, bulk/organisation tags, NFC write support.
+- Community found-map, NFC write support.
 - Native React Native wrapper that reuses the FastAPI backend.
 
 ## License
