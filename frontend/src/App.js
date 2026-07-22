@@ -20,6 +20,8 @@ import TagEditPage from "@/pages/TagEdit";
 import TagQRPage from "@/pages/TagQR";
 import TagMedicalPage from "@/pages/TagMedical";
 import InboxPage from "@/pages/Inbox";
+import BatchesPage from "@/pages/Batches";
+import BatchDetailPage from "@/pages/BatchDetail";
 import SettingsPage from "@/pages/Settings";
 import StoriesPage from "@/pages/Stories";
 import { FinderRedirect } from "@/pages/FinderRedirect";
@@ -63,6 +65,8 @@ function AppRouter() {
                 }
             >
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/batches" element={<BatchesPage />} />
+                <Route path="/batches/:id" element={<BatchDetailPage />} />
                 <Route path="/inbox" element={<InboxPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/tags/new" element={<TagEditPage />} />

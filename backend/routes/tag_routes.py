@@ -54,7 +54,14 @@ def _tag_doc_to_out(doc: dict) -> dict:
 @router.get("/tags", response_model=list[TagOut])
 async def list_tags(user: dict = Depends(_current_user_dep)) -> list[dict]:
     db = get_db()
-    docs = [d async for d in db.tags.find({"owner_id": user["id"]}, {"_id": 0}).sort("created_at", -1)]
+    # Bulk/event batch tags are managed under /batches, not the personal
+    # dashboard — excluding them keeps a large print run from flooding it.
+    docs = [
+        d
+        async for d in db.tags.find(
+            {"owner_id": user["id"], "batch_id": {"$in": [None]}}, {"_id": 0}
+        ).sort("created_at", -1)
+    ]
     return [_tag_doc_to_out(d) for d in docs]
 
 

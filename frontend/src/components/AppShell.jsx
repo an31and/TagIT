@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Bell, LayoutGrid, LogOut, Settings as SettingsIcon, ShieldCheck, Tag } from "lucide-react";
+import { Bell, Boxes, LayoutGrid, LogOut, Settings as SettingsIcon, ShieldCheck, Tag } from "lucide-react";
 
 import { Button } from "../components/ui/button";
 import { useAuth } from "../lib/auth";
@@ -37,6 +37,7 @@ export function AppShell() {
                     </Link>
                     <nav className="hidden md:flex items-center gap-1 text-sm">
                         <NavTab to="/dashboard" icon={<LayoutGrid className="h-4 w-4" />} label={t("common.dashboard")} testId="nav-dashboard" />
+                        <NavTab to="/batches" icon={<Boxes className="h-4 w-4" />} label="Bulk tags" testId="nav-batches" />
                         <NavTab to="/inbox" icon={<Bell className="h-4 w-4" />} label={t("common.inbox")} testId="nav-inbox" />
                         <NavTab to="/settings" icon={<SettingsIcon className="h-4 w-4" />} label={t("common.settings")} testId="nav-settings" />
                         {user?.role === "admin" && (
@@ -99,10 +100,14 @@ function BottomTabs({ t }) {
         "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs font-medium";
     return (
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-30 border-t bg-background/95 backdrop-blur">
-            <div className="grid grid-cols-3">
+            <div className="grid grid-cols-4">
                 <NavLink to="/dashboard" data-testid="tab-dashboard" className={({ isActive }) => `${item} ${isActive ? "text-accent" : "text-muted-foreground"}`}>
                     <LayoutGrid className="h-5 w-5" />
                     {t("common.dashboard")}
+                </NavLink>
+                <NavLink to="/batches" data-testid="tab-batches" className={({ isActive }) => `${item} ${isActive ? "text-accent" : "text-muted-foreground"}`}>
+                    <Boxes className="h-5 w-5" />
+                    Bulk
                 </NavLink>
                 <NavLink to="/inbox" data-testid="tab-inbox" className={({ isActive }) => `${item} ${isActive ? "text-accent" : "text-muted-foreground"}`}>
                     <Bell className="h-5 w-5" />

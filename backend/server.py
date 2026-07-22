@@ -25,6 +25,7 @@ from notifications import (  # noqa: E402
 )
 from routes.admin_routes import router as admin_router  # noqa: E402
 from routes.auth_routes import router as auth_router  # noqa: E402
+from routes.batch_routes import router as batch_router  # noqa: E402
 from push import push_enabled  # noqa: E402
 from routes.contact_routes import router as contact_router  # noqa: E402
 from routes.push_routes import router as push_router  # noqa: E402
@@ -80,6 +81,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(admin_router)
+app.include_router(batch_router)
 app.include_router(contact_router)
 app.include_router(push_router)
 app.include_router(public_router)
